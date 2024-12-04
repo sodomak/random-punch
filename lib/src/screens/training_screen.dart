@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:math';
 import '../l10n/app_localizations.dart';
 import '../models/training_settings.dart';
+import '../services/sound_service.dart';
 
 class TrainingScreen extends StatefulWidget {
   final TrainingSettings settings;
@@ -17,7 +18,6 @@ class TrainingScreen extends StatefulWidget {
 }
 
 class _TrainingScreenState extends State<TrainingScreen> {
-  late Timer _timer;
   int _countdown = 0;
   bool _isCountingDown = true;
   bool _isBreak = false;
@@ -26,78 +26,111 @@ class _TrainingScreenState extends State<TrainingScreen> {
   late Duration _remainingTime;
   int _currentRound = 1;
   bool _isFinished = false;
+  final SoundService _soundService = SoundService();
+  Timer? _countdownTimer;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
+    _remainingTime = Duration.zero;
+    _initializeSoundService();
+  }
+
+  Future<void> _initializeSoundService() async {
+    await _soundService.initialize();
     _startCountdown();
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _countdownTimer?.cancel();
+    _timer?.cancel();
+    _soundService.dispose();
     super.dispose();
   }
 
   void _startCountdown() {
     setState(() {
       _countdown = widget.settings.countdownLength.inSeconds;
+      _isCountingDown = true;
     });
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (_countdown > 1) {
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_countdown > 0) {
+        setState(() {
           _countdown--;
-        } else {
+        });
+      } else {
+        timer.cancel();
+        _soundService.playStart();
+        setState(() {
           _isCountingDown = false;
-          timer.cancel();
-          _startRound();
-        }
-      });
+        });
+        _startRound();
+      }
     });
   }
 
   void _startRound() {
-    setState(() {
-      _isBreak = false;
-      _remainingTime = widget.settings.roundLength;
+    _timer?.cancel();
+    _soundService.playStart();
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _isBreak = false;
+          _remainingTime = widget.settings.roundLength;
+        });
+        _startTraining();
+        _startTimer();
+      }
     });
-    _startTraining();
-    _startTimer();
   }
 
   void _startBreak() {
-    setState(() {
-      _isBreak = true;
-      _currentRound++;
-      
-      if (_currentRound > widget.settings.numberOfRounds) {
-        _isFinished = true;
-        _timer.cancel();
-        return;
+    _timer?.cancel();
+
+    if (_currentRound + 1 > widget.settings.numberOfRounds) {
+      _soundService.playFinish();
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          setState(() {
+            _isFinished = true;
+            _currentNumbers = [];
+          });
+        }
+      });
+      return;
+    }
+
+    _soundService.playEnd();
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _isBreak = true;
+          _currentRound++;
+          _remainingTime = widget.settings.breakLength;
+          _currentNumbers = [];
+        });
+        _startTimer();
       }
-      
-      _remainingTime = widget.settings.breakLength;
-      _currentNumbers = [];
     });
-    _timer.cancel();
-    _startTimer();
   }
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (_remainingTime.inSeconds > 1) {
+      if (_remainingTime.inSeconds > 0) {
+        setState(() {
           _remainingTime = Duration(seconds: _remainingTime.inSeconds - 1);
+        });
+      } else {
+        timer.cancel();
+        if (_isBreak) {
+          _startRound();
         } else {
-          timer.cancel();
-          if (_isBreak) {
-            _startRound();
-          } else {
-            _startBreak();
-          }
+          _startBreak();
         }
-      });
+      }
     });
   }
 
@@ -168,6 +201,16 @@ class _TrainingScreenState extends State<TrainingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.training),
+        actions: [
+          IconButton(
+            icon: Icon(_soundService.isMuted ? Icons.volume_off : Icons.volume_up),
+            onPressed: () {
+              setState(() {
+                _soundService.toggleMute();
+              });
+            },
+          ),
+        ],
       ),
       body: Center(
         child: Column(
