@@ -29,6 +29,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
   final SoundService _soundService = SoundService();
   Timer? _countdownTimer;
   Timer? _timer;
+  bool _isPaused = false;
 
   @override
   void initState() {
@@ -80,6 +81,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
         setState(() {
           _isBreak = false;
           _remainingTime = widget.settings.roundLength;
+          _isPaused = false;
         });
         _startTraining();
         _startTimer();
@@ -97,6 +99,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
           setState(() {
             _isFinished = true;
             _currentNumbers = [];
+            _isPaused = false;
           });
         }
       });
@@ -111,6 +114,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
           _currentRound++;
           _remainingTime = widget.settings.breakLength;
           _currentNumbers = [];
+          _isPaused = false;
         });
         _startTimer();
       }
@@ -118,10 +122,16 @@ class _TrainingScreenState extends State<TrainingScreen> {
   }
 
   void _startTimer() {
+    final startTime = DateTime.now();
+    final initialRemainingTime = _remainingTime.inSeconds;
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_remainingTime.inSeconds > 0) {
+      final elapsedTime = DateTime.now().difference(startTime).inSeconds;
+      final newRemainingTime = initialRemainingTime - elapsedTime;
+
+      if (newRemainingTime > 0) {
         setState(() {
-          _remainingTime = Duration(seconds: _remainingTime.inSeconds - 1);
+          _remainingTime = Duration(seconds: newRemainingTime);
         });
       } else {
         timer.cancel();
@@ -190,8 +200,20 @@ class _TrainingScreenState extends State<TrainingScreen> {
       _isBreak = false;
       _currentRound = 1;
       _currentNumbers = [];
+      _isPaused = false;
     });
     _startCountdown();
+  }
+
+  void _togglePause() {
+    setState(() {
+      _isPaused = !_isPaused;
+      if (_isPaused) {
+        _timer?.cancel();
+      } else {
+        _startTimer();
+      }
+    });
   }
 
   @override
@@ -202,14 +224,25 @@ class _TrainingScreenState extends State<TrainingScreen> {
       appBar: AppBar(
         title: Text(l10n.training),
         actions: [
+          if (!_isCountingDown && !_isFinished)
+            IconButton(
+              icon: Icon(_isPaused ? Icons.play_arrow : Icons.pause),
+              onPressed: _togglePause,
+              tooltip: _isPaused ? l10n.resume : l10n.pause,
+            ),
           IconButton(
-            icon: Icon(_soundService.isMuted ? Icons.volume_off : Icons.volume_up),
+            icon: Icon(
+              _soundService.isMuted ? Icons.volume_off : Icons.volume_up,
+              size: 28,
+            ),
             onPressed: () {
               setState(() {
                 _soundService.toggleMute();
               });
             },
+            tooltip: _soundService.isMuted ? l10n.unmute : l10n.mute,
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: Center(

@@ -29,6 +29,13 @@ abstract class AppLocalizations {
   String get about;
   String get version;
   String get author;
+  String get sound;
+  String get soundOn;
+  String get soundOff;
+  String get pause;
+  String get resume;
+  String get mute;
+  String get unmute;
 }
 
 class AppLocalizationsEn extends AppLocalizations {
@@ -80,6 +87,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get version => 'Version';
   @override
   String get author => 'Author';
+  @override
+  String get sound => 'Sound';
+  @override
+  String get soundOn => 'Sound On';
+  @override
+  String get soundOff => 'Sound Off';
+  @override
+  String get pause => 'Pause';
+  @override
+  String get resume => 'Resume';
+  @override
+  String get mute => 'Mute';
+  @override
+  String get unmute => 'Unmute';
 }
 
 class AppLocalizationsCs extends AppLocalizations {
@@ -131,4 +152,18 @@ class AppLocalizationsCs extends AppLocalizations {
   String get version => 'Verze';
   @override
   String get author => 'Autor';
+  @override
+  String get sound => 'Zvuk';
+  @override
+  String get soundOn => 'Zvuk zapnutý';
+  @override
+  String get soundOff => 'Zvuk vypnutý';
+  @override
+  String get pause => 'Pozastavit';
+  @override
+  String get resume => 'Pokračovat';
+  @override
+  String get mute => 'Ztlumit';
+  @override
+  String get unmute => 'Zapnout zvuk';
 } 
