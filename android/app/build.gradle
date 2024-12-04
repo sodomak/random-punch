@@ -5,6 +5,14 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
 android {
     namespace = "com.example.random_punch"
     compileSdk = flutter.compileSdkVersion
@@ -21,8 +29,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.random_punch"
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
+        minSdkVersion = flutter.minSdkVersion
+        targetSdkVersion = flutter.targetSdkVersion
         
         // Get version from pubspec.yaml
         def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
