@@ -23,13 +23,6 @@ jobs:
           VERSION=$(grep -oP "(?<=appVersion = ')[^']*" lib/src/version.dart)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Verify version tag doesn't exist
-        run: |
-          if git rev-parse "v${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
-            echo "Error: Tag v${{ steps.get_version.outputs.version }} already exists"
-            exit 1
-          fi
-
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -39,8 +32,9 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0'
+          flutter-version: '3.19.3'
           channel: 'stable'
+          cache: true
 
       - name: Get dependencies
         run: flutter pub get
