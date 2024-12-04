@@ -10,14 +10,25 @@ on:
 jobs:
   build_and_release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Get version
         id: get_version
         run: |
           VERSION=$(grep -oP "(?<=appVersion = ')[^']*" lib/src/version.dart)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Verify version tag doesn't exist
+        run: |
+          if git rev-parse "v${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
+            echo "Error: Tag v${{ steps.get_version.outputs.version }} already exists"
+            exit 1
+          fi
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -37,15 +48,41 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
 
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$PREVIOUS_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"* %s" main)
+          else
+            CHANGELOG=$(git log --pretty=format:"* %s" $PREVIOUS_TAG..HEAD)
+          fi
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Create Release
-        id: create_release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
           name: Release v${{ steps.get_version.outputs.version }}
+          body: |
+            Changes in this release:
+            ${{ steps.changelog.outputs.CHANGELOG }}
           draft: false
           prerelease: false
           files: |
             build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload to releases directory
+        run: |
+          mkdir -p releases/android
+          cp build/app/outputs/flutter-apk/app-release.apk releases/android/random-punch.apk
+          sha1sum releases/android/random-punch.apk > releases/android/random-punch.sha1
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add releases/android/
+          git commit -m "Update release artifacts for v${{ steps.get_version.outputs.version }}"
+          git push

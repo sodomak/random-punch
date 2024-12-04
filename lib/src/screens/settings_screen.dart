@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import '../l10n/app_localizations.dart';
 import '../services/settings_service.dart';
 import '../models/training_settings.dart';
+import '../widgets/time_settings_field.dart';
+import '../widgets/number_settings_field.dart';
 
 class SettingsScreen extends StatefulWidget {
   final void Function(Locale) onLocaleChanged;
@@ -115,6 +117,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Duration get roundLength => Duration(
+        minutes: int.parse(_roundMinutes.text),
+        seconds: int.parse(_roundSeconds.text),
+      );
+
+  Duration get breakLength => Duration(
+        minutes: int.parse(_breakMinutes.text),
+        seconds: int.parse(_breakSeconds.text),
+      );
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -123,214 +135,175 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: AppBar(
         title: Text(l10n.settings),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Language / Jazyk'),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: [
-                ChoiceChip(
-                  label: const Text('English'),
-                  selected: Localizations.localeOf(context).languageCode == 'en',
-                  onSelected: (selected) {
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text('Language / Jazyk'),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: [
+              ChoiceChip(
+                label: const Text('English'),
+                selected: Localizations.localeOf(context).languageCode == 'en',
+                onSelected: (selected) {
+                  if (selected) {
+                    widget.onLocaleChanged(const Locale('en', ''));
+                  }
+                },
+              ),
+              ChoiceChip(
+                label: const Text('Čeština'),
+                selected: Localizations.localeOf(context).languageCode == 'cs',
+                onSelected: (selected) {
+                  if (selected) {
+                    widget.onLocaleChanged(const Locale('cs', ''));
+                  }
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          TimeSettingsField(
+            label: l10n.roundLength,
+            duration: roundLength,
+            onChanged: (duration) {
+              setState(() {
+                _roundMinutes.text = duration.inMinutes.toString();
+                _roundSeconds.text = (duration.inSeconds % 60).toString();
+              });
+            },
+          ),
+          const SizedBox(height: 24),
+          TimeSettingsField(
+            label: l10n.breakLength,
+            duration: breakLength,
+            onChanged: (duration) {
+              setState(() {
+                _breakMinutes.text = duration.inMinutes.toString();
+                _breakSeconds.text = (duration.inSeconds % 60).toString();
+              });
+            },
+          ),
+          const SizedBox(height: 16),
+          NumberSettingsField(
+            label: l10n.countdownLength,
+            value: int.parse(_countdownSeconds.text),
+            onChanged: (value) => setState(() => _countdownSeconds.text = value.toString()),
+            maxValue: 60,
+            suffix: 'sec',
+          ),
+          const SizedBox(height: 16),
+          Text(l10n.selectNumbers),
+          Wrap(
+            spacing: 8,
+            children: List.generate(10, (index) {
+              return FilterChip(
+                label: Text('$index'),
+                selected: _selectedNumbers.contains(index),
+                onSelected: (selected) {
+                  setState(() {
                     if (selected) {
-                      widget.onLocaleChanged(const Locale('en', ''));
+                      _selectedNumbers.add(index);
+                    } else {
+                      _selectedNumbers.remove(index);
                     }
-                  },
-                ),
-                ChoiceChip(
-                  label: const Text('Čeština'),
-                  selected: Localizations.localeOf(context).languageCode == 'cs',
-                  onSelected: (selected) {
-                    if (selected) {
-                      widget.onLocaleChanged(const Locale('cs', ''));
-                    }
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Text(l10n.roundLength),
+                  });
+                },
+              );
+            }),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Text(l10n.numbersToShow),
+              const Spacer(),
+              Switch(
+                value: _isFixedNumberCount,
+                onChanged: (value) {
+                  setState(() {
+                    _isFixedNumberCount = value;
+                  });
+                },
+              ),
+              Text(_isFixedNumberCount ? l10n.fixedCount : l10n.randomRange),
+            ],
+          ),
+          if (_isFixedNumberCount)
+            NumberSettingsField(
+              label: l10n.numberOfDigits,
+              value: int.parse(_fixedNumberCount.text),
+              onChanged: (value) => setState(() => _fixedNumberCount.text = value.toString()),
+              minValue: 1,
+              maxValue: 10,
+            )
+          else
             Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _roundMinutes,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                      labelText: 'Minutes',
-                    ),
+                  child: NumberSettingsField(
+                    label: l10n.minimumDigits,
+                    value: int.parse(_minNumberCount.text),
+                    onChanged: (value) => setState(() => _minNumberCount.text = value.toString()),
+                    minValue: 1,
+                    maxValue: int.parse(_maxNumberCount.text),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: TextField(
-                    controller: _roundSeconds,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                      labelText: 'Seconds',
-                    ),
+                  child: NumberSettingsField(
+                    label: l10n.maximumDigits,
+                    value: int.parse(_maxNumberCount.text),
+                    onChanged: (value) => setState(() => _maxNumberCount.text = value.toString()),
+                    minValue: int.parse(_minNumberCount.text),
+                    maxValue: 10,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            Text(l10n.breakLength),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _breakMinutes,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                      labelText: 'Minutes',
-                    ),
-                  ),
+          const SizedBox(height: 16),
+          Text(l10n.intervalBetweenNumbers),
+          Row(
+            children: [
+              Expanded(
+                child: NumberSettingsField(
+                  label: 'Minimum',
+                  value: int.parse(_minInterval.text),
+                  onChanged: (value) => setState(() => _minInterval.text = value.toString()),
+                  minValue: 1,
+                  maxValue: int.parse(_maxInterval.text),
+                  suffix: 'sec',
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextField(
-                    controller: _breakSeconds,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                      labelText: 'Seconds',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(l10n.countdownLength),
-            TextField(
-              controller: _countdownSeconds,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: const InputDecoration(
-                labelText: 'Seconds',
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(l10n.selectNumbers),
-            Wrap(
-              spacing: 8,
-              children: List.generate(10, (index) {
-                return FilterChip(
-                  label: Text('$index'),
-                  selected: _selectedNumbers.contains(index),
-                  onSelected: (selected) {
-                    setState(() {
-                      if (selected) {
-                        _selectedNumbers.add(index);
-                      } else {
-                        _selectedNumbers.remove(index);
-                      }
-                    });
-                  },
-                );
-              }),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Text(l10n.numbersToShow),
-                const Spacer(),
-                Switch(
-                  value: _isFixedNumberCount,
-                  onChanged: (value) {
-                    setState(() {
-                      _isFixedNumberCount = value;
-                    });
-                  },
+              const SizedBox(width: 16),
+              Expanded(
+                child: NumberSettingsField(
+                  label: 'Maximum',
+                  value: int.parse(_maxInterval.text),
+                  onChanged: (value) => setState(() => _maxInterval.text = value.toString()),
+                  minValue: int.parse(_minInterval.text),
+                  maxValue: 30,
+                  suffix: 'sec',
                 ),
-                Text(_isFixedNumberCount ? l10n.fixedCount : l10n.randomRange),
-              ],
-            ),
-            if (_isFixedNumberCount)
-              TextField(
-                controller: _fixedNumberCount,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                decoration: InputDecoration(
-                  labelText: l10n.numberOfDigits,
-                ),
-              )
-            else
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _minNumberCount,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: InputDecoration(
-                        labelText: l10n.minimumDigits,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: _maxNumberCount,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: InputDecoration(
-                        labelText: l10n.maximumDigits,
-                      ),
-                    ),
-                  ),
-                ],
               ),
-            const SizedBox(height: 16),
-            Text(l10n.intervalBetweenNumbers),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _minInterval,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                      labelText: 'Minimum',
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextField(
-                    controller: _maxInterval,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                      labelText: 'Maximum',
-                    ),
-                  ),
-                ),
-              ],
+            ],
+          ),
+          const SizedBox(height: 16),
+          NumberSettingsField(
+            label: l10n.numberOfRounds,
+            value: int.parse(_numberOfRounds.text),
+            onChanged: (value) => setState(() => _numberOfRounds.text = value.toString()),
+            minValue: 1,
+            maxValue: 99,
+          ),
+          const SizedBox(height: 24),
+          Center(
+            child: ElevatedButton(
+              onPressed: _saveSettings,
+              child: Text(l10n.save),
             ),
-            const SizedBox(height: 16),
-            Text(l10n.numberOfRounds),
-            TextField(
-              controller: _numberOfRounds,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            ),
-            const SizedBox(height: 24),
-            Center(
-              child: ElevatedButton(
-                onPressed: _saveSettings,
-                child: Text(l10n.save),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
