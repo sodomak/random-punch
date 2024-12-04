@@ -21,8 +21,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.random_punch"
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion flutter.targetSdkVersion
         
         // Get version from pubspec.yaml
         def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
@@ -40,7 +40,7 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.debug
+            signingConfig signingConfigs.debug
         }
     }
 }
