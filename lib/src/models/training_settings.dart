@@ -10,6 +10,7 @@ class TrainingSettings {
   final Duration minInterval;
   final Duration maxInterval;
   final String name;
+  final int numberOfRounds;
 
   TrainingSettings({
     this.roundLength = const Duration(minutes: 3),
@@ -23,6 +24,7 @@ class TrainingSettings {
     this.minInterval = const Duration(seconds: 3),
     this.maxInterval = const Duration(seconds: 10),
     this.name = 'Default',
+    this.numberOfRounds = 3,
   });
 
   TrainingSettings copyWith({
@@ -37,6 +39,7 @@ class TrainingSettings {
     Duration? minInterval,
     Duration? maxInterval,
     String? name,
+    int? numberOfRounds,
   }) {
     return TrainingSettings(
       roundLength: roundLength ?? this.roundLength,
@@ -50,6 +53,7 @@ class TrainingSettings {
       minInterval: minInterval ?? this.minInterval,
       maxInterval: maxInterval ?? this.maxInterval,
       name: name ?? this.name,
+      numberOfRounds: numberOfRounds ?? this.numberOfRounds,
     );
   }
 } 

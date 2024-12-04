@@ -20,6 +20,12 @@ abstract class AppLocalizations {
   String get minimumDigits;
   String get maximumDigits;
   String get numberOfDigits;
+  String get training;
+  String get numberOfRounds;
+  String get getReady;
+  String get trainingFinished;
+  String get repeat;
+  String get backToHome;
 }
 
 class AppLocalizationsEn extends AppLocalizations {
@@ -53,6 +59,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get maximumDigits => 'Maximum Digits';
   @override
   String get numberOfDigits => 'Number of Digits to Show';
+  @override
+  String get training => 'Training';
+  @override
+  String get numberOfRounds => 'Number of Rounds';
+  @override
+  String get getReady => 'Get Ready!';
+  @override
+  String get trainingFinished => 'Training Finished!';
+  @override
+  String get repeat => 'Repeat';
+  @override
+  String get backToHome => 'Back to Home';
 }
 
 class AppLocalizationsCs extends AppLocalizations {
@@ -86,4 +104,16 @@ class AppLocalizationsCs extends AppLocalizations {
   String get maximumDigits => 'Maximum číslic';
   @override
   String get numberOfDigits => 'Počet zobrazených číslic';
+  @override
+  String get training => 'Trénink';
+  @override
+  String get numberOfRounds => 'Počet kol';
+  @override
+  String get getReady => 'Připravte se!';
+  @override
+  String get trainingFinished => 'Trénink dokončen!';
+  @override
+  String get repeat => 'Opakovat';
+  @override
+  String get backToHome => 'Zpět domů';
 } 

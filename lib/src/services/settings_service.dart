@@ -24,6 +24,7 @@ class SettingsService {
       'minInterval': settings.minInterval.inSeconds,
       'maxInterval': settings.maxInterval.inSeconds,
       'name': name,
+      'numberOfRounds': settings.numberOfRounds,
     };
     
     // Update or add settings
@@ -54,6 +55,7 @@ class SettingsService {
       minInterval: Duration(seconds: settingsJson['minInterval'] as int),
       maxInterval: Duration(seconds: settingsJson['maxInterval'] as int),
       name: settingsJson['name'] as String,
+      numberOfRounds: settingsJson['numberOfRounds'] as int,
     );
   }
 

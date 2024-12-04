@@ -29,6 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _maxNumberCount = TextEditingController(text: '4');
   final _minInterval = TextEditingController(text: '3');
   final _maxInterval = TextEditingController(text: '10');
+  final _numberOfRounds = TextEditingController(text: '3');
   
   bool _isFixedNumberCount = true;
   final Set<int> _selectedNumbers = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -45,6 +46,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _maxNumberCount.dispose();
     _minInterval.dispose();
     _maxInterval.dispose();
+    _numberOfRounds.dispose();
     super.dispose();
   }
 
@@ -71,6 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _maxNumberCount.text = settings.maxNumberCount.toString();
         _minInterval.text = settings.minInterval.inSeconds.toString();
         _maxInterval.text = settings.maxInterval.inSeconds.toString();
+        _numberOfRounds.text = settings.numberOfRounds.toString();
       });
     }
   }
@@ -93,6 +96,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       maxNumberCount: int.parse(_maxNumberCount.text),
       minInterval: Duration(seconds: int.parse(_minInterval.text)),
       maxInterval: Duration(seconds: int.parse(_maxInterval.text)),
+      numberOfRounds: int.parse(_numberOfRounds.text),
     );
 
     try {
@@ -310,6 +314,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 16),
+            Text(l10n.numberOfRounds),
+            TextField(
+              controller: _numberOfRounds,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
             const SizedBox(height: 24),
             Center(

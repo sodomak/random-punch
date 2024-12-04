@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
+import '../services/settings_service.dart';
 import 'settings_screen.dart';
+import 'training_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   final void Function(Locale) onLocaleChanged;
 
   const HomeScreen({
@@ -11,38 +13,33 @@ class HomeScreen extends StatelessWidget {
   });
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appTitle),
-        actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.language),
-            onSelected: (String languageCode) {
-              onLocaleChanged(Locale(languageCode, ''));
-            },
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem(
-                value: 'en',
-                child: Text('English'),
-              ),
-              const PopupMenuItem(
-                value: 'cs',
-                child: Text('Čeština'),
-              ),
-            ],
-          ),
-        ],
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () {
-                // TODO: Start training
+              onPressed: () async {
+                final settings = await SettingsService().loadSettings('Default');
+                if (settings != null && mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TrainingScreen(settings: settings),
+                    ),
+                  );
+                }
               },
               child: Text(l10n.startTraining),
             ),
@@ -53,7 +50,7 @@ class HomeScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => SettingsScreen(
-                      onLocaleChanged: onLocaleChanged,
+                      onLocaleChanged: widget.onLocaleChanged,
                     ),
                   ),
                 );
