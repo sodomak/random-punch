@@ -26,6 +26,9 @@ abstract class AppLocalizations {
   String get trainingFinished;
   String get repeat;
   String get backToHome;
+  String get about;
+  String get version;
+  String get author;
 }
 
 class AppLocalizationsEn extends AppLocalizations {
@@ -71,6 +74,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repeat => 'Repeat';
   @override
   String get backToHome => 'Back to Home';
+  @override
+  String get about => 'About';
+  @override
+  String get version => 'Version';
+  @override
+  String get author => 'Author';
 }
 
 class AppLocalizationsCs extends AppLocalizations {
@@ -116,4 +125,10 @@ class AppLocalizationsCs extends AppLocalizations {
   String get repeat => 'Opakovat';
   @override
   String get backToHome => 'Zpět domů';
+  @override
+  String get about => 'O aplikaci';
+  @override
+  String get version => 'Verze';
+  @override
+  String get author => 'Autor';
 } 
