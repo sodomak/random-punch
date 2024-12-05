@@ -55,10 +55,8 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
       await SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
       ]);
-      await SystemChannels.platform.invokeMethod('HapticFeedback.vibrate');
-      await SystemChannels.platform.invokeMethod('SystemChrome.setKeepScreenOn', true);
     } catch (e) {
-      debugPrint('Error keeping screen on: $e');
+      debugPrint('Error setting screen orientation: $e');
     }
   }
 
