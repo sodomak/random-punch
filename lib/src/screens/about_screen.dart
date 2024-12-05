@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
+import '../version.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -29,7 +30,7 @@ class AboutScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 16),
-            Text('${l10n.version}: 1.0.0'),
+            Text('${l10n.version}: $appVersion'),
             const SizedBox(height: 8),
             InkWell(
               onTap: () => _launchUrl('https://x.com/sodomak'),
