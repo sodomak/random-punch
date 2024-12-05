@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
@@ -19,14 +20,12 @@ class AboutScreen extends StatelessWidget {
       final directory = await getApplicationDocumentsDirectory();
       final file = File('${directory.path}/error_log.txt');
       if (await file.exists()) {
-        // Use your preferred method to share the file
-        // For example, using share_plus package
         await Share.shareFiles([file.path], text: 'App Error Logs');
       } else {
-        // Show message that no logs exist
+        print('No logs to share.');
       }
     } catch (e) {
-      // Handle error
+      print('Error sharing logs: $e');
     }
   }
 
