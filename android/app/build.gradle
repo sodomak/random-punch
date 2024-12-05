@@ -28,13 +28,12 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.random_punch"
-        minSdkVersion = flutter.minSdkVersion
-        targetSdkVersion = flutter.targetSdkVersion
+        applicationId "com.sodomak.randompunch"
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion flutter.targetSdkVersion
         
-        def (major, minor, patch) = rootProject.file('../pubspec.yaml').readLines().find { it.startsWith('version:') }.substring(9).split(/[.+]/)
-        versionCode = (major.toInteger() * 10000) + (minor.toInteger() * 100) + patch.toInteger()
-        versionName = "${major}.${minor}.${patch}"
+        versionCode 3
+        versionName "1.0.3"
     }
 
     buildTypes {
