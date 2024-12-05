@@ -32,9 +32,11 @@ android {
         minSdkVersion = flutter.minSdkVersion
         targetSdkVersion = flutter.targetSdkVersion
         
-        // Get version from pubspec.yaml
-        versionCode = project.findProperty("flutter.versionCode").toInteger()
-        versionName = project.findProperty("flutter.versionName")
+        def flutterVersionCode = project.findProperty('flutter.versionCode')?.toInteger() ?: 1
+        def flutterVersionName = project.findProperty('flutter.versionName') ?: '1.0.0'
+        
+        versionCode = flutterVersionCode
+        versionName = flutterVersionName
     }
 
     buildTypes {

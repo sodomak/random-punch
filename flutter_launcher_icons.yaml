@@ -1,10 +1,9 @@
 flutter_icons:
   android: true
   ios: true
-  web: true
-  image_path: "icon.png"
   web:
     generate: true
+  image_path: "assets/icon/icon.png"
   windows:
     generate: true
   macos:
