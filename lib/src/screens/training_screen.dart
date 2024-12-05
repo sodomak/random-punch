@@ -4,7 +4,7 @@ import 'dart:math';
 import '../l10n/app_localizations.dart';
 import '../models/training_settings.dart';
 import '../services/sound_service.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:screen_brightness_android/screen_brightness_android.dart';
 
 class TrainingScreen extends StatefulWidget {
   final TrainingSettings settings;
@@ -31,13 +31,14 @@ class _TrainingScreenState extends State<TrainingScreen> {
   Timer? _countdownTimer;
   Timer? _timer;
   bool _isPaused = false;
+  final _screenBrightness = ScreenBrightnessAndroid();
 
   @override
   void initState() {
     super.initState();
     _remainingTime = Duration.zero;
     _initializeSoundService();
-    Wakelock.enable();
+    _keepScreenOn();
   }
 
   Future<void> _initializeSoundService() async {
@@ -45,12 +46,20 @@ class _TrainingScreenState extends State<TrainingScreen> {
     _startCountdown();
   }
 
+  Future<void> _keepScreenOn() async {
+    try {
+      await _screenBrightness.keepOn(true);
+    } catch (e) {
+      debugPrint('Error keeping screen on: $e');
+    }
+  }
+
   @override
   void dispose() {
     _countdownTimer?.cancel();
     _timer?.cancel();
     _soundService.dispose();
-    Wakelock.disable();
+    _screenBrightness.keepOn(false);
     super.dispose();
   }
 

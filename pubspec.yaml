@@ -40,7 +40,7 @@ dependencies:
   just_audio_web: ^0.4.9
   path_provider: ^2.0.15
   share_plus: ^7.2.1
-  wakelock: ^0.4.0
+  screen_brightness_android: ^0.1.0
 
 
   # The following adds the Cupertino Icons font to your application.
