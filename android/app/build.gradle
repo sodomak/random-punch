@@ -14,7 +14,7 @@ if (localPropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.example.random_punch"
+    namespace = "com.sodomak.randompunch"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
