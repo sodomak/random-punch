@@ -38,6 +38,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   void dispose() {
+    _saveSettings();
+    
     _roundMinutes.dispose();
     _roundSeconds.dispose();
     _breakMinutes.dispose();
