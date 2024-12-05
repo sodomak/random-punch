@@ -23,9 +23,12 @@ void main(List<String> args) {
   // Update pubspec.yaml
   final pubspecFile = File('pubspec.yaml');
   final pubspecContent = pubspecFile.readAsStringSync();
+  final currentVersion = RegExp(r'version: (\d+\.\d+\.\d+)\+(\d+)').firstMatch(pubspecContent);
+  final newVersionCode = currentVersion != null ? int.parse(currentVersion.group(2)!) + 1 : 1;
+  
   final updatedPubspec = pubspecContent.replaceFirst(
     RegExp(r'version: \d+\.\d+\.\d+\+\d+'),
-    'version: $newVersion+1'
+    'version: $newVersion+$newVersionCode'
   );
   pubspecFile.writeAsStringSync(updatedPubspec);
 

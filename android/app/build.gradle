@@ -32,11 +32,9 @@ android {
         minSdkVersion = flutter.minSdkVersion
         targetSdkVersion = flutter.targetSdkVersion
         
-        def flutterVersionCode = project.findProperty('flutter.versionCode')?.toInteger() ?: 1
-        def flutterVersionName = project.findProperty('flutter.versionName') ?: '1.0.0'
-        
-        versionCode = flutterVersionCode
-        versionName = flutterVersionName
+        def (major, minor, patch) = rootProject.file('../pubspec.yaml').readLines().find { it.startsWith('version:') }.substring(9).split(/[.+]/)
+        versionCode = (major.toInteger() * 10000) + (minor.toInteger() * 100) + patch.toInteger()
+        versionName = "${major}.${minor}.${patch}"
     }
 
     buildTypes {
