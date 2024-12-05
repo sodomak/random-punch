@@ -32,7 +32,7 @@ class AboutScreen extends StatelessWidget {
             Text('${l10n.version}: 1.0.0'),
             const SizedBox(height: 8),
             InkWell(
-              onTap: () => _launchUrl('https://github.com/sodomak/random-punch'),
+              onTap: () => _launchUrl('https://x.com/sodomak'),
               child: Text(
                 '${l10n.author}: Sodomak',
                 style: const TextStyle(
