@@ -1,4 +1,4 @@
-package com.example.random_punch
+package com.sodomak.randompunch
 
 import io.flutter.embedding.android.FlutterActivity
 
