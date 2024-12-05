@@ -82,9 +82,10 @@ class _TrainingScreenState extends State<TrainingScreen> {
           _isBreak = false;
           _remainingTime = widget.settings.roundLength;
           _isPaused = false;
+          _currentNumbers = [];
         });
-        _startTraining();
         _startTimer();
+        _scheduleNextNumbers();
       }
     });
   }
@@ -142,11 +143,6 @@ class _TrainingScreenState extends State<TrainingScreen> {
         }
       }
     });
-  }
-
-  void _startTraining() {
-    _generateNumbers();
-    _scheduleNextNumbers();
   }
 
   void _scheduleNextNumbers() {
