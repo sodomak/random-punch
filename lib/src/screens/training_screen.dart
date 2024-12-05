@@ -18,7 +18,7 @@ class TrainingScreen extends StatefulWidget {
   State<TrainingScreen> createState() => _TrainingScreenState();
 }
 
-class _TrainingScreenState extends State<TrainingScreen> {
+class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObserver {
   int _countdown = 0;
   bool _isCountingDown = true;
   bool _isBreak = false;
@@ -35,6 +35,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _remainingTime = Duration.zero;
     _initializeSoundService();
     _keepScreenOn();
@@ -49,15 +50,13 @@ class _TrainingScreenState extends State<TrainingScreen> {
     try {
       await SystemChrome.setEnabledSystemUIMode(
         SystemUiMode.manual,
-        overlays: [SystemUiOverlay.top],
-      );
-      await SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.manual,
         overlays: SystemUiOverlay.values,
       );
       await SystemChrome.setPreferredOrientations([
         DeviceOrientation.portraitUp,
       ]);
+      await SystemChannels.platform.invokeMethod('HapticFeedback.vibrate');
+      await SystemChannels.platform.invokeMethod('SystemChrome.setKeepScreenOn', true);
     } catch (e) {
       debugPrint('Error keeping screen on: $e');
     }
@@ -65,15 +64,24 @@ class _TrainingScreenState extends State<TrainingScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _countdownTimer?.cancel();
     _timer?.cancel();
     _soundService.dispose();
+    SystemChannels.platform.invokeMethod('SystemChrome.setKeepScreenOn', false);
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
     );
     SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _keepScreenOn();
+    }
   }
 
   void _startCountdown() {
