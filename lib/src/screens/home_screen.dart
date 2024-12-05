@@ -52,14 +52,12 @@ class HomeScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 final settings = await SettingsService().loadSettings('Default');
-                if (settings != null) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TrainingScreen(settings: settings),
-                    ),
-                  );
-                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TrainingScreen(settings: settings),
+                  ),
+                );
               },
               child: Text(l10n.startTraining),
             ),

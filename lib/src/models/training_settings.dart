@@ -56,4 +56,21 @@ class TrainingSettings {
       numberOfRounds: numberOfRounds ?? this.numberOfRounds,
     );
   }
+
+  static TrainingSettings getDefault() {
+    return TrainingSettings(
+      roundLength: const Duration(minutes: 3),
+      breakLength: const Duration(minutes: 1),
+      countdownLength: const Duration(seconds: 10),
+      selectedNumbers: const [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+      isFixedNumberCount: true,
+      fixedNumberCount: 1,
+      minNumberCount: 1,
+      maxNumberCount: 4,
+      minInterval: const Duration(seconds: 3),
+      maxInterval: const Duration(seconds: 10),
+      name: 'Default',
+      numberOfRounds: 3,
+    );
+  }
 } 

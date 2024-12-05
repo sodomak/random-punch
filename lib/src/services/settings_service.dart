@@ -36,12 +36,17 @@ class SettingsService {
     await prefs.setString(_activeSettingKey, name);
   }
 
-  Future<TrainingSettings?> loadSettings(String name) async {
+  Future<TrainingSettings> loadSettings(String name) async {
     final prefs = await SharedPreferences.getInstance();
     final allSettings = await getSettingsList();
     
     final settingsJson = allSettings[name];
-    if (settingsJson == null) return null;
+    if (settingsJson == null) {
+      // If no settings exist, return and save default settings
+      final defaultSettings = TrainingSettings.getDefault();
+      await saveSettings(defaultSettings, name);
+      return defaultSettings;
+    }
     
     return TrainingSettings(
       roundLength: Duration(seconds: settingsJson['roundLength'] as int),
