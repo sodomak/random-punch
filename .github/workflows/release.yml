@@ -81,7 +81,9 @@ jobs:
           sha1sum releases/android/random-punch.apk > releases/android/random-punch.sha1
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
+          git stash -u  # Stash all changes including untracked files
           git pull --rebase origin main
+          git stash pop  # Restore changes
           git add releases/android/
           git commit -m "Update release artifacts for v${{ steps.get_version.outputs.version }}"
           git push origin main
