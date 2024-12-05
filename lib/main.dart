@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'src/screens/home_screen.dart';
@@ -6,7 +10,41 @@ import 'src/services/settings_service.dart';
 import 'src/services/theme_service.dart';
 
 void main() {
-  runApp(const MyApp());
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    
+    FlutterError.onError = (FlutterErrorDetails details) async {
+      // Log to file
+      await _logError(details.exception, details.stack);
+      // Print to console
+      FlutterError.dumpErrorToConsole(details);
+    };
+
+    runApp(const MyApp());
+  }, (error, stack) async {
+    // Handle errors not caught by Flutter
+    await _logError(error, stack);
+    if (kDebugMode) {
+      print('Error: $error\nStack trace: $stack');
+    }
+  });
+}
+
+Future<void> _logError(dynamic error, StackTrace? stack) async {
+  try {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/error_log.txt');
+    final timestamp = DateTime.now().toIso8601String();
+    
+    await file.writeAsString(
+      '$timestamp\nError: $error\nStack trace: $stack\n\n',
+      mode: FileMode.append,
+    );
+  } catch (e) {
+    if (kDebugMode) {
+      print('Failed to write error log: $e');
+    }
+  }
 }
 
 class MyApp extends StatefulWidget {

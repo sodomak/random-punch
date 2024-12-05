@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../version.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -9,6 +11,22 @@ class AboutScreen extends StatelessWidget {
   Future<void> _launchUrl(String url) async {
     if (!await launchUrl(Uri.parse(url))) {
       throw Exception('Could not launch $url');
+    }
+  }
+
+  Future<void> _shareLogs() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/error_log.txt');
+      if (await file.exists()) {
+        // Use your preferred method to share the file
+        // For example, using share_plus package
+        await Share.shareFiles([file.path], text: 'App Error Logs');
+      } else {
+        // Show message that no logs exist
+      }
+    } catch (e) {
+      // Handle error
     }
   }
 
