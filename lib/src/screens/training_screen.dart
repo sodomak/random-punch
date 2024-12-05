@@ -4,7 +4,7 @@ import 'dart:math';
 import '../l10n/app_localizations.dart';
 import '../models/training_settings.dart';
 import '../services/sound_service.dart';
-import 'package:screen_brightness_android/screen_brightness_android.dart';
+import 'package:flutter/services.dart';
 
 class TrainingScreen extends StatefulWidget {
   final TrainingSettings settings;
@@ -31,7 +31,6 @@ class _TrainingScreenState extends State<TrainingScreen> {
   Timer? _countdownTimer;
   Timer? _timer;
   bool _isPaused = false;
-  final _screenBrightness = ScreenBrightnessAndroid();
 
   @override
   void initState() {
@@ -48,7 +47,17 @@ class _TrainingScreenState extends State<TrainingScreen> {
 
   Future<void> _keepScreenOn() async {
     try {
-      await _screenBrightness.keepOn(true);
+      await SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.manual,
+        overlays: [SystemUiOverlay.top],
+      );
+      await SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.manual,
+        overlays: SystemUiOverlay.values,
+      );
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
     } catch (e) {
       debugPrint('Error keeping screen on: $e');
     }
@@ -59,7 +68,11 @@ class _TrainingScreenState extends State<TrainingScreen> {
     _countdownTimer?.cancel();
     _timer?.cancel();
     _soundService.dispose();
-    _screenBrightness.keepOn(false);
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
+    SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     super.dispose();
   }
 
