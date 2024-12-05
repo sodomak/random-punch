@@ -4,6 +4,7 @@ import 'dart:math';
 import '../l10n/app_localizations.dart';
 import '../models/training_settings.dart';
 import '../services/sound_service.dart';
+import 'package:wakelock/wakelock.dart';
 
 class TrainingScreen extends StatefulWidget {
   final TrainingSettings settings;
@@ -36,6 +37,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
     super.initState();
     _remainingTime = Duration.zero;
     _initializeSoundService();
+    Wakelock.enable();
   }
 
   Future<void> _initializeSoundService() async {
@@ -48,6 +50,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
     _countdownTimer?.cancel();
     _timer?.cancel();
     _soundService.dispose();
+    Wakelock.disable();
     super.dispose();
   }
 
