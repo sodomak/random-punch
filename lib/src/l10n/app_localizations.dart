@@ -36,6 +36,9 @@ abstract class AppLocalizations {
   String get resume;
   String get mute;
   String get unmute;
+  String get theme;
+  String get lightTheme;
+  String get darkTheme;
 }
 
 class AppLocalizationsEn extends AppLocalizations {
@@ -101,6 +104,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mute => 'Mute';
   @override
   String get unmute => 'Unmute';
+  @override
+  String get theme => 'Theme';
+  @override
+  String get lightTheme => 'Light';
+  @override
+  String get darkTheme => 'Dark';
 }
 
 class AppLocalizationsCs extends AppLocalizations {
@@ -166,4 +175,10 @@ class AppLocalizationsCs extends AppLocalizations {
   String get mute => 'Ztlumit';
   @override
   String get unmute => 'Zapnout zvuk';
+  @override
+  String get theme => 'Téma';
+  @override
+  String get lightTheme => 'Světlé';
+  @override
+  String get darkTheme => 'Tmavé';
 } 

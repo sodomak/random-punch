@@ -8,10 +8,14 @@ import '../widgets/number_settings_field.dart';
 
 class SettingsScreen extends StatefulWidget {
   final void Function(Locale) onLocaleChanged;
+  final void Function(bool) onThemeChanged;
+  final bool isDarkMode;
 
   const SettingsScreen({
     super.key,
     required this.onLocaleChanged,
+    required this.onThemeChanged,
+    required this.isDarkMode,
   });
 
   @override
@@ -35,6 +39,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   
   bool _isFixedNumberCount = true;
   final Set<int> _selectedNumbers = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  late bool _isDarkMode;
 
   @override
   void dispose() {
@@ -58,6 +63,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _loadSettings();
+    _isDarkMode = widget.isDarkMode;
   }
 
   Future<void> _loadSettings() async {
@@ -297,6 +303,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: (value) => setState(() => _numberOfRounds.text = value.toString()),
             minValue: 1,
             maxValue: 99,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Text(l10n.theme),
+              const Spacer(),
+              Switch(
+                value: _isDarkMode,
+                onChanged: (value) {
+                  setState(() {
+                    _isDarkMode = value;
+                  });
+                  widget.onThemeChanged(value);
+                },
+              ),
+              Text(_isDarkMode ? l10n.darkTheme : l10n.lightTheme),
+            ],
           ),
           const SizedBox(height: 24),
           Center(

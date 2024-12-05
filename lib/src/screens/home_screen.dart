@@ -5,19 +5,18 @@ import 'settings_screen.dart';
 import 'training_screen.dart';
 import 'about_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   final void Function(Locale) onLocaleChanged;
+  final void Function(bool) onThemeChanged;
+  final bool isDarkMode;
 
   const HomeScreen({
     super.key,
     required this.onLocaleChanged,
+    required this.onThemeChanged,
+    required this.isDarkMode,
   });
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -53,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ElevatedButton(
               onPressed: () async {
                 final settings = await SettingsService().loadSettings('Default');
-                if (settings != null && mounted) {
+                if (settings != null) {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -71,7 +70,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => SettingsScreen(
-                      onLocaleChanged: widget.onLocaleChanged,
+                      onLocaleChanged: onLocaleChanged,
+                      onThemeChanged: onThemeChanged,
+                      isDarkMode: isDarkMode,
                     ),
                   ),
                 );
