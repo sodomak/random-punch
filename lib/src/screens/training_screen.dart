@@ -7,6 +7,7 @@ import '../services/sound_service.dart';
 import 'package:flutter/services.dart';
 import '../models/training_stats.dart';
 import '../services/stats_service.dart';
+import 'package:just_audio/just_audio.dart';
 
 class TrainingScreen extends StatefulWidget {
   final TrainingSettings settings;
@@ -313,6 +314,22 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
 
   void _stopTraining() {
     Navigator.of(context).pop();
+  }
+
+  Future<void> _playNumberSequence(List<int> numbers) async {
+    final locale = Localizations.localeOf(context);
+    for (final number in numbers) {
+      final player = await _soundService.playNumber(number, locale.languageCode);
+      if (player != null) {
+        try {
+          await player.playerStateStream.firstWhere(
+            (state) => state.processingState == ProcessingState.completed
+          );
+        } finally {
+          player.dispose();
+        }
+      }
+    }
   }
 
   @override

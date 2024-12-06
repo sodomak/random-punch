@@ -31,12 +31,13 @@
 
   <title>random_punch</title>
   <link rel="manifest" href="manifest.json">
+  <script src="flutter.js" defer></script>
+  <script src="assets/packages/just_audio/just_audio.js" type="application/javascript" defer></script>
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
   <script>
     window.addEventListener('load', function(ev) {
-      // Download main.dart.js
+      var serviceWorkerVersion = null;
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
@@ -49,7 +50,5 @@
       });
     });
   </script>
-  <!-- Add this to ensure audio works in web -->
-  <script src="assets/packages/just_audio/just_audio.js"></script>
 </body>
 </html>
