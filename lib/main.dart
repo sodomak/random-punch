@@ -70,6 +70,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> _initServices() async {
     await _soundService.initialize();
     await _loadThemeSettings();
+    await _loadLanguageSettings();
   }
 
   Future<void> _loadThemeSettings() async {
@@ -83,10 +84,31 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void _setLocale(Locale locale) {
+  Future<void> _loadLanguageSettings() async {
+    try {
+      final settingsService = SettingsService();
+      final savedLanguage = await settingsService.getLanguage();
+      debugPrint('Loading saved language: $savedLanguage');
+      setState(() {
+        _locale = Locale(savedLanguage, '');
+      });
+      debugPrint('Set locale to: ${_locale.languageCode}');
+    } catch (e) {
+      debugPrint('Error loading language settings: $e');
+    }
+  }
+
+  void _setLocale(Locale locale) async {
     setState(() {
       _locale = locale;
     });
+    try {
+      final settingsService = SettingsService();
+      await settingsService.setLanguage(locale.languageCode);
+      debugPrint('Saved language: ${locale.languageCode}');
+    } catch (e) {
+      debugPrint('Error saving language setting: $e');
+    }
   }
 
   void _setThemeMode(bool isDarkMode) async {

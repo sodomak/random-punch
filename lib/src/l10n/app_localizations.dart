@@ -56,6 +56,9 @@ abstract class AppLocalizations {
   String get reset;
   String get cancel;
   String get totalTime;
+  String get appearance;
+  String get trainingSetup;
+  String get numbersConfiguration;
 }
 
 class AppLocalizationsEn extends AppLocalizations {
@@ -161,6 +164,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
   @override
   String get totalTime => 'Total Time';
+  @override
+  String get appearance => 'Appearance';
+  @override
+  String get trainingSetup => 'Training Setup';
+  @override
+  String get numbersConfiguration => 'Numbers Configuration';
 }
 
 class AppLocalizationsCs extends AppLocalizations {
@@ -253,7 +262,7 @@ class AppLocalizationsCs extends AppLocalizations {
   @override
   String get combinationsThrown => 'Celkový počet kombinací';
   @override
-  String get punchesThrown => 'Celkový počet náraz��';
+  String get punchesThrown => 'Celkový počet nárazů';
   @override
   String get roundsCompleted => 'Celkový počet kolků';
   @override
@@ -266,4 +275,10 @@ class AppLocalizationsCs extends AppLocalizations {
   String get cancel => 'Zrušit';
   @override
   String get totalTime => 'Celkový čas';
+  @override
+  String get appearance => 'Vzhled';
+  @override
+  String get trainingSetup => 'Nastavení tréninku';
+  @override
+  String get numbersConfiguration => 'Konfigurace čísel';
 } 
