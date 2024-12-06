@@ -37,19 +37,17 @@ android {
     }
 
     signingConfigs {
-        if (System.getenv('STORE_PASSWORD') != null) {
-            release {
-                storeFile file("upload-keystore.jks")
-                storePassword System.getenv('STORE_PASSWORD')
-                keyAlias System.getenv('KEY_ALIAS')
-                keyPassword System.getenv('KEY_PASSWORD')
-            }
+        release {
+            storeFile file("upload-keystore.jks")
+            storePassword System.getenv('STORE_PASSWORD')
+            keyAlias System.getenv('KEY_ALIAS')
+            keyPassword System.getenv('KEY_PASSWORD')
         }
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.findByName('release') ?: signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
 }
