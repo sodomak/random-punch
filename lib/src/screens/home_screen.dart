@@ -49,33 +49,71 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
-              onPressed: () async {
-                final settings = await SettingsService().loadSettings('Default');
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TrainingScreen(settings: settings),
-                  ),
-                );
-              },
-              child: Text(l10n.startTraining),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SettingsScreen(
-                      onLocaleChanged: onLocaleChanged,
-                      onThemeChanged: onThemeChanged,
-                      isDarkMode: isDarkMode,
+            // Start Training Button
+            Container(
+              width: 200,
+              height: 200,
+              margin: const EdgeInsets.all(20),
+              child: ElevatedButton(
+                onPressed: () async {
+                  final settings = await SettingsService().loadSettings('Default');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TrainingScreen(settings: settings),
                     ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(24),
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.play_arrow, size: 64),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.startTraining,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            // Settings Button
+            SizedBox(
+              width: 180,
+              height: 60,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SettingsScreen(
+                        onLocaleChanged: onLocaleChanged,
+                        onThemeChanged: onThemeChanged,
+                        isDarkMode: isDarkMode,
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.settings, size: 28),
+                label: Text(
+                  l10n.settings,
+                  style: const TextStyle(fontSize: 18),
+                ),
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
                   ),
-                );
-              },
-              child: Text(l10n.settings),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+              ),
             ),
           ],
         ),
