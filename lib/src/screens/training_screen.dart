@@ -5,6 +5,8 @@ import '../l10n/app_localizations.dart';
 import '../models/training_settings.dart';
 import '../services/sound_service.dart';
 import 'package:flutter/services.dart';
+import '../models/training_stats.dart';
+import '../services/stats_service.dart';
 
 class TrainingScreen extends StatefulWidget {
   final TrainingSettings settings;
@@ -27,6 +29,7 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
   List<int> _currentNumbers = [];
   final Random _random = Random();
   late Duration _remainingTime;
+  int _completedRounds = 0;
   int _currentRound = 1;
   bool _isFinished = false;
   Timer? _countdownTimer;
@@ -34,6 +37,14 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
   bool _isPaused = false;
   DateTime? _pauseTime;
   Duration? _remainingAtPause;
+  final DateTime _startTime = DateTime.now();
+  int _combinationsThrown = 0;
+  int _punchesThrown = 0;
+  int _trainingTimeSeconds = 0;
+  int _breakTimeSeconds = 0;
+
+  // Track time periods
+  DateTime? _roundStartTime;
 
   SoundService get _soundService => widget.soundService;
 
@@ -108,6 +119,7 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
     setState(() {
       _isBreak = false;
       _remainingTime = widget.settings.roundLength;
+      _roundStartTime = DateTime.now();  // Start tracking round time
     });
     _soundService.playStart();
     _startTimer();
@@ -115,7 +127,16 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
   }
 
   void _startBreak() {
-    if (_currentRound >= widget.settings.numberOfRounds) {
+    // Calculate and add the time spent in the round
+    if (_roundStartTime != null) {
+      _trainingTimeSeconds += widget.settings.roundLength.inSeconds;
+    }
+    
+    setState(() {
+      _completedRounds++;
+    });
+
+    if (_completedRounds >= widget.settings.numberOfRounds) {
       _finishTraining();
       return;
     }
@@ -124,14 +145,38 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
       _isBreak = true;
       _remainingTime = widget.settings.breakLength;
       _currentRound++;
+      _roundStartTime = DateTime.now();  // Start tracking break time
     });
     _soundService.playEnd();
     _startTimer();
   }
 
-  void _finishTraining() {
+  void _finishTraining() async {
     _soundService.playFinish();
     _timer?.cancel();
+    
+    // Add the final round time if we're not in a break
+    if (!_isBreak && _roundStartTime != null) {
+      _trainingTimeSeconds += widget.settings.roundLength.inSeconds;
+    }
+    
+    // Save training statistics
+    final stats = TrainingStats(
+      startTime: _startTime,
+      endTime: DateTime.now(),
+      trainingTimeSeconds: _trainingTimeSeconds,
+      breakTimeSeconds: _breakTimeSeconds,
+      combinationsThrown: _combinationsThrown,
+      punchesThrown: _punchesThrown,
+      roundsCompleted: _completedRounds,
+    );
+    
+    try {
+      await StatsService().saveTrainingStats(stats);
+    } catch (e) {
+      debugPrint('Error saving training stats: $e');
+    }
+
     setState(() {
       _isFinished = true;
     });
@@ -151,13 +196,15 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
       final elapsedTime = DateTime.now().difference(startTime).inSeconds;
       final newRemainingTime = initialRemainingTime - elapsedTime;
 
-      if (newRemainingTime > 0) {
-        setState(() {
-          _remainingTime = Duration(seconds: newRemainingTime);
-        });
-      } else {
+      setState(() {
+        _remainingTime = Duration(seconds: max(0, newRemainingTime));
+      });
+
+      if (newRemainingTime <= 0) {
         timer.cancel();
         if (_isBreak) {
+          // Add exact break time
+          _breakTimeSeconds += widget.settings.breakLength.inSeconds;
           _startRound();
         } else {
           _startBreak();
@@ -186,28 +233,33 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
   void _generateNumbers() {
     setState(() {
       final numbers = widget.settings.selectedNumbers;
+      List<int> newNumbers;
+      
       if (widget.settings.isFixedNumberCount) {
-        _currentNumbers = List.generate(
+        newNumbers = List.generate(
           widget.settings.fixedNumberCount,
           (_) => numbers[_random.nextInt(numbers.length)],
         );
       } else {
         final count = _random.nextInt(
-              widget.settings.maxNumberCount - widget.settings.minNumberCount + 1,
-            ) +
-            widget.settings.minNumberCount;
-        _currentNumbers = List.generate(
+          widget.settings.maxNumberCount - widget.settings.minNumberCount + 1,
+        ) + widget.settings.minNumberCount;
+        newNumbers = List.generate(
           count,
           (_) => numbers[_random.nextInt(numbers.length)],
         );
       }
+      
+      _currentNumbers = newNumbers;
+      _combinationsThrown++;
+      _punchesThrown += newNumbers.length;
     });
   }
 
-  String _formatDuration(Duration duration) {
-    final minutes = duration.inMinutes;
-    final seconds = duration.inSeconds % 60;
-    return '$minutes:${seconds.toString().padLeft(2, '0')}';
+  String _formatTime(int totalSeconds) {
+    final minutes = totalSeconds ~/ 60;
+    final seconds = totalSeconds % 60;
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';  // Pad seconds with leading zero if needed
   }
 
   void _restartTraining() {
@@ -216,8 +268,13 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
       _isCountingDown = true;
       _isBreak = false;
       _currentRound = 1;
+      _completedRounds = 0;
       _currentNumbers = [];
       _isPaused = false;
+      _trainingTimeSeconds = 0;  // Reset time counters
+      _breakTimeSeconds = 0;     // Reset time counters
+      _combinationsThrown = 0;   // Reset combination counter
+      _punchesThrown = 0;        // Reset punch counter
     });
     _startCountdown();
   }
@@ -302,30 +359,66 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
           title: Text(l10n.training),
         ),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                l10n.trainingFinished,
-                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 48),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: _restartTraining,
-                    icon: const Icon(Icons.repeat),
-                    label: Text(l10n.repeat),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  l10n.trainingFinished,
+                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 32),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Session Statistics',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 16),
+                        _StatRow(
+                          label: l10n.totalTime,
+                          value: _formatTime(_trainingTimeSeconds + _breakTimeSeconds),
+                        ),
+                        _StatRow(
+                          label: l10n.combinationsThrown,
+                          value: _combinationsThrown.toString(),
+                        ),
+                        _StatRow(
+                          label: l10n.punchesThrown,
+                          value: _punchesThrown.toString(),
+                        ),
+                        _StatRow(
+                          label: l10n.roundsCompleted,
+                          value: '$_completedRounds/${widget.settings.numberOfRounds}',
+                        ),
+                      ],
+                    ),
                   ),
-                  ElevatedButton.icon(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.home),
-                    label: Text(l10n.backToHome),
-                  ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(height: 48),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _restartTraining,
+                      icon: const Icon(Icons.repeat),
+                      label: Text(l10n.repeat),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.home),
+                      label: Text(l10n.backToHome),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -385,7 +478,7 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        _formatDuration(_remainingTime),
+                        _formatTime(_remainingTime.inSeconds),
                         style: const TextStyle(
                           fontSize: 48,
                           fontWeight: FontWeight.bold,
@@ -458,3 +551,30 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
     );
   }
 } 
+
+class _StatRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _StatRow({
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+}

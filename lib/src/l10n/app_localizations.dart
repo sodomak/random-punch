@@ -40,6 +40,22 @@ abstract class AppLocalizations {
   String get lightTheme;
   String get darkTheme;
   String get break_;
+  String get statistics;
+  String get day;
+  String get week;
+  String get month;
+  String get all;
+  String get totalTrainings;
+  String get totalTrainingTime;
+  String get totalBreakTime;
+  String get combinationsThrown;
+  String get punchesThrown;
+  String get roundsCompleted;
+  String get resetStats;
+  String get resetStatsConfirmation;
+  String get reset;
+  String get cancel;
+  String get totalTime;
 }
 
 class AppLocalizationsEn extends AppLocalizations {
@@ -113,6 +129,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get darkTheme => 'Dark';
   @override
   String get break_ => 'Break';
+  @override
+  String get statistics => 'Statistics';
+  @override
+  String get day => 'Day';
+  @override
+  String get week => 'Week';
+  @override
+  String get month => 'Month';
+  @override
+  String get all => 'All';
+  @override
+  String get totalTrainings => 'Total Trainings';
+  @override
+  String get totalTrainingTime => 'Total Training Time';
+  @override
+  String get totalBreakTime => 'Total Break Time';
+  @override
+  String get combinationsThrown => 'Combinations Thrown';
+  @override
+  String get punchesThrown => 'Punches Thrown';
+  @override
+  String get roundsCompleted => 'Rounds Completed';
+  @override
+  String get resetStats => 'Reset Statistics';
+  @override
+  String get resetStatsConfirmation => 'Are you sure you want to reset all statistics? This action cannot be undone.';
+  @override
+  String get reset => 'Reset';
+  @override
+  String get cancel => 'Cancel';
+  @override
+  String get totalTime => 'Total Time';
 }
 
 class AppLocalizationsCs extends AppLocalizations {
@@ -186,4 +234,36 @@ class AppLocalizationsCs extends AppLocalizations {
   String get darkTheme => 'Tmavé';
   @override
   String get break_ => 'Pauza';
+  @override
+  String get statistics => 'Statistiky';
+  @override
+  String get day => 'Den';
+  @override
+  String get week => 'Týden';
+  @override
+  String get month => 'Měsíc';
+  @override
+  String get all => 'Vše';
+  @override
+  String get totalTrainings => 'Celkový počet tréninků';
+  @override
+  String get totalTrainingTime => 'Celkový čas tréninků';
+  @override
+  String get totalBreakTime => 'Celkový čas pauzy';
+  @override
+  String get combinationsThrown => 'Celkový počet kombinací';
+  @override
+  String get punchesThrown => 'Celkový počet náraz��';
+  @override
+  String get roundsCompleted => 'Celkový počet kolků';
+  @override
+  String get resetStats => 'Resetovat statistiky';
+  @override
+  String get resetStatsConfirmation => 'Opravdu chcete resetovat všechny statistiky? Tuto akci nelze vrátit zpět.';
+  @override
+  String get reset => 'Resetovat';
+  @override
+  String get cancel => 'Zrušit';
+  @override
+  String get totalTime => 'Celkový čas';
 } 

@@ -5,6 +5,7 @@ import '../services/sound_service.dart';
 import 'settings_screen.dart';
 import 'training_screen.dart';
 import 'about_screen.dart';
+import 'stats_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final void Function(Locale) onLocaleChanged;
@@ -134,6 +135,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            // Stats Button
+            SizedBox(
+              width: 180,
+              height: 60,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const StatsScreen()),
+                  );
+                },
+                icon: const Icon(Icons.bar_chart),
+                label: Text(l10n.statistics),
               ),
             ),
           ],
