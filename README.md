@@ -29,5 +29,16 @@ A training app for MMA/boxing that helps athletes practice techniques and combin
 ### Language
 - Switch between English and Czech using the language selector
 
+### Statistics
+- Track your training progress with detailed statistics
+- View total training time, breaks, and rounds completed
+- Monitor combinations and punches thrown
+- Filter statistics by day, week, month, or all-time
+
+### Audio Features
+- Voice announcements of numbers in English or Czech
+- Sound effects for training events (start, end, breaks)
+- Mutable audio for quiet training sessions
+
 ## License
 GNU General Public License v3.0

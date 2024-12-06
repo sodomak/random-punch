@@ -59,6 +59,27 @@ abstract class AppLocalizations {
   String get appearance;
   String get trainingSetup;
   String get numbersConfiguration;
+  String get help;
+  String get quickStartGuide;
+  String get helpStartTraining;
+  String get helpGetReady;
+  String get helpTraining;
+  String get helpBreaks;
+  String get helpRoundLength;
+  String get helpBreakLength;
+  String get helpCountdownLength;
+  String get helpNumberOfRounds;
+  String get helpNumbersToShow;
+  String get helpFixedCount;
+  String get helpRandomRange;
+  String get helpIntervalBetweenNumbers;
+  String get helpStatsProgress;
+  String get helpStatsTime;
+  String get helpStatsCombos;
+  String get helpStatsFilter;
+  String get helpVoiceAnnouncements;
+  String get helpSoundEffects;
+  String get helpMutableAudio;
 }
 
 class AppLocalizationsEn extends AppLocalizations {
@@ -170,6 +191,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trainingSetup => 'Training Setup';
   @override
   String get numbersConfiguration => 'Numbers Configuration';
+  @override
+  String get help => 'Help';
+  @override
+  String get quickStartGuide => 'Quick Start Guide';
+  @override
+  String get helpStartTraining => 'Click the "Start Training" button on the home screen';
+  @override
+  String get helpGetReady => 'A countdown will begin before your training starts';
+  @override
+  String get helpTraining => 'Follow the numbers displayed and perform corresponding techniques';
+  @override
+  String get helpBreaks => 'Rest between rounds when indicated';
+  @override
+  String get helpRoundLength => 'Set the duration of each training round';
+  @override
+  String get helpBreakLength => 'Set the duration of rest periods between rounds';
+  @override
+  String get helpCountdownLength => 'Set the initial countdown duration before training starts';
+  @override
+  String get helpNumberOfRounds => 'Set how many rounds you want to train';
+  @override
+  String get helpNumbersToShow => 'Choose between fixed count or random range';
+  @override
+  String get helpFixedCount => 'Always shows the same number of digits';
+  @override
+  String get helpRandomRange => 'Shows a varying number of digits within your set range';
+  @override
+  String get helpIntervalBetweenNumbers => 'Set how quickly new numbers appear';
+  @override
+  String get helpStatsProgress => 'Track your training progress with detailed statistics';
+  @override
+  String get helpStatsTime => 'View total training time, breaks, and rounds completed';
+  @override
+  String get helpStatsCombos => 'Monitor combinations and punches thrown';
+  @override
+  String get helpStatsFilter => 'Filter statistics by day, week, month, or all-time';
+  @override
+  String get helpVoiceAnnouncements => 'Voice announcements of numbers in English or Czech';
+  @override
+  String get helpSoundEffects => 'Sound effects for training events (start, end, breaks)';
+  @override
+  String get helpMutableAudio => 'Mutable audio for quiet training sessions';
 }
 
 class AppLocalizationsCs extends AppLocalizations {
@@ -262,9 +325,9 @@ class AppLocalizationsCs extends AppLocalizations {
   @override
   String get combinationsThrown => 'Celkový počet kombinací';
   @override
-  String get punchesThrown => 'Celkový počet nárazů';
+  String get punchesThrown => 'Celkový počet úderů';
   @override
-  String get roundsCompleted => 'Celkový počet kolků';
+  String get roundsCompleted => 'Celkový počet kol';
   @override
   String get resetStats => 'Resetovat statistiky';
   @override
@@ -281,4 +344,46 @@ class AppLocalizationsCs extends AppLocalizations {
   String get trainingSetup => 'Nastavení tréninku';
   @override
   String get numbersConfiguration => 'Konfigurace čísel';
+  @override
+  String get help => 'Návod';
+  @override
+  String get quickStartGuide => 'Rychlý návod';
+  @override
+  String get helpStartTraining => 'Klikněte na tlačítko "Začít Trénink" na hlavní obrazovce';
+  @override
+  String get helpGetReady => 'Počítač se začne odpočítávat před začátkem tréninku';
+  @override
+  String get helpTraining => 'Následujte zobrazená čísla a provádějte odpovídající techniky';
+  @override
+  String get helpBreaks => 'Odpočinek mezi koly, když je to naznačeno';
+  @override
+  String get helpRoundLength => 'Nastavte dobu trvání každého tréninkového kola';
+  @override
+  String get helpBreakLength => 'Nastavte dobu odpočinku mezi koly';
+  @override
+  String get helpCountdownLength => 'Nastavte dobu počátečního odpočtu před začátkem tréninku';
+  @override
+  String get helpNumberOfRounds => 'Nastavte, kolik kol chcete trénovat';
+  @override
+  String get helpNumbersToShow => 'Vyberte mezi pevným počtem nebo náhodným rozsahem';
+  @override
+  String get helpFixedCount => 'Vždy ukazuje stejný počet číslic';
+  @override
+  String get helpRandomRange => 'Ukazuje různý počet číslic v rámci nastaveného rozsahu';
+  @override
+  String get helpIntervalBetweenNumbers => 'Nastavte, jak rychle se objevují nové čísla';
+  @override
+  String get helpStatsProgress => 'Sledujte postup tréninku s podrobnými statistikami';
+  @override
+  String get helpStatsTime => 'Zobrazte celkový čas tréninků, pauz a dokončených kol';
+  @override
+  String get helpStatsCombos => 'Monitorujte kombinace a údery';
+  @override
+  String get helpStatsFilter => 'Filtrovat statistiky podle dne, týdne, měsíce nebo celé doby';
+  @override
+  String get helpVoiceAnnouncements => 'Zvukové zprávy o číslech v angličtině nebo češtině';
+  @override
+  String get helpSoundEffects => 'Zvukové efekty pro tréninkové události (začátek, konec, pauzy)';
+  @override
+  String get helpMutableAudio => 'Měnitelný zvuk pro tišší tréninky';
 } 

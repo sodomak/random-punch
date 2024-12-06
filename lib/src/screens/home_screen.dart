@@ -6,6 +6,7 @@ import 'settings_screen.dart';
 import 'training_screen.dart';
 import 'about_screen.dart';
 import 'stats_screen.dart';
+import 'help_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final void Function(Locale) onLocaleChanged;
@@ -46,16 +47,30 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           PopupMenuButton<String>(
             onSelected: (value) {
-              if (value == 'about') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AboutScreen(),
-                  ),
-                );
+              switch (value) {
+                case 'help':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HelpScreen(),
+                    ),
+                  );
+                  break;
+                case 'about':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AboutScreen(),
+                    ),
+                  );
+                  break;
               }
             },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              PopupMenuItem<String>(
+                value: 'help',
+                child: Text(l10n.help),
+              ),
               PopupMenuItem<String>(
                 value: 'about',
                 child: Text(l10n.about),

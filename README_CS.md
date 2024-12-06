@@ -29,5 +29,16 @@ Tréninková aplikace pro MMA/box, která pomáhá sportovcům cvičit techniky 
 ### Jazyk
 - Přepínejte mezi češtinou a angličtinou pomocí výběru jazyka
 
+### Statistiky
+- Sledujte svůj tréninkový pokrok s detailními statistikami
+- Zobrazení celkového času tréninku, přestávek a dokončených kol
+- Sledování provedených kombinací a úderů
+- Filtrování statistik podle dne, týdne, měsíce nebo celkové historie
+
+### Zvukové funkce
+- Hlasové oznámení čísel v češtině nebo angličtině
+- Zvukové efekty pro tréninkové události (start, konec, pauzy)
+- Možnost ztlumení zvuku pro tichý trénink
+
 ## Licence
 GNU General Public License v3.0 
