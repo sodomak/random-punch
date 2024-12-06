@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 
 class SoundService {
   bool _isMuted = false;
-  bool _isInitialized = true;
+  bool _isInitialized = false;
   static const String _muteKey = 'isMuted';
 
   SoundService() {
@@ -27,8 +27,18 @@ class SoundService {
     
     try {
       if (kIsWeb) {
-        // Web-specific initialization
         await AudioPlayer.clearAssetCache();
+        
+        // Pre-initialize audio context and test with a simple sound
+        final testPlayer = AudioPlayer();
+        await testPlayer.setAsset('assets/sounds/countdown.mp3');
+        await testPlayer.seek(Duration.zero);
+        await testPlayer.setVolume(0);
+        await testPlayer.play();
+        await testPlayer.stop();
+        await testPlayer.dispose();
+        
+        debugPrint('Web audio context initialized successfully');
       }
       _isInitialized = true;
       debugPrint('SoundService initialized successfully');
@@ -59,7 +69,7 @@ class SoundService {
       final player = await _createPlayer('assets/sounds/countdown.mp3');
       await player.seek(Duration.zero);
       await player.play();
-      player.dispose();
+      await player.dispose();
     } catch (e) {
       developer.log('Error playing countdown sound: $e', error: e);
     }
@@ -71,7 +81,7 @@ class SoundService {
       final player = await _createPlayer('assets/sounds/start.mp3');
       await player.seek(Duration.zero);
       await player.play();
-      player.dispose();
+      await player.dispose();
     } catch (e) {
       developer.log('Error playing start sound: $e', error: e);
     }
@@ -83,7 +93,7 @@ class SoundService {
       final player = await _createPlayer('assets/sounds/end.mp3');
       await player.seek(Duration.zero);
       await player.play();
-      player.dispose();
+      await player.dispose();
     } catch (e) {
       developer.log('Error playing end sound: $e', error: e);
     }
@@ -95,7 +105,7 @@ class SoundService {
       final player = await _createPlayer('assets/sounds/finish.mp3');
       await player.seek(Duration.zero);
       await player.play();
-      player.dispose();
+      await player.dispose();
     } catch (e) {
       developer.log('Error playing finish sound: $e', error: e);
     }
@@ -107,33 +117,46 @@ class SoundService {
       return null;
     }
     
-    final player = AudioPlayer();
     try {
       String assetPath = 'assets/sounds/$languageCode/$number.mp3';
-      debugPrint('Web platform: ${kIsWeb}');
       debugPrint('Attempting to play sound: $assetPath');
       
-      try {
-        await player.setAsset(assetPath);
-        debugPrint('Asset loaded successfully: $assetPath');
-        await player.play();
-        debugPrint('Successfully started playing: $assetPath');
-        return player;
-      } catch (e) {
-        debugPrint('Primary language sound failed ($languageCode): $e');
-        if (languageCode != 'en') {
+      final player = await _createPlayer(assetPath);
+      await player.seek(Duration.zero);
+      await player.play();
+      
+      // Wait for completion
+      await player.playerStateStream.firstWhere(
+        (state) => state.processingState == ProcessingState.completed
+      );
+      await player.dispose();
+      debugPrint('Successfully played and disposed: $assetPath');
+      return null;
+      
+    } catch (e) {
+      debugPrint('Primary language sound failed ($languageCode): $e');
+      if (languageCode != 'en') {
+        try {
           String fallbackPath = 'assets/sounds/en/$number.mp3';
           debugPrint('Attempting fallback sound: $fallbackPath');
-          await player.setAsset(fallbackPath);
+          
+          final player = await _createPlayer(fallbackPath);
+          await player.seek(Duration.zero);
           await player.play();
-          debugPrint('Successfully playing fallback: $fallbackPath');
-          return player;
+          
+          // Wait for completion
+          await player.playerStateStream.firstWhere(
+            (state) => state.processingState == ProcessingState.completed
+          );
+          await player.dispose();
+          debugPrint('Successfully played and disposed fallback: $fallbackPath');
+          return null;
+        } catch (e) {
+          debugPrint('Fallback sound failed: $e');
+          return null;
         }
-        throw e;
       }
-    } catch (e) {
       debugPrint('Error playing any sound: $e');
-      await player.dispose();
       return null;
     }
   }
@@ -142,5 +165,4 @@ class SoundService {
     _isInitialized = false;
     developer.log('Disposing SoundService');
   }
-
 } 

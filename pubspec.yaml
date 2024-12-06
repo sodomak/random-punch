@@ -105,5 +105,23 @@ flutter:
     - assets/sounds/start.mp3
     - assets/sounds/end.mp3
     - assets/sounds/finish.mp3
-    - assets/sounds/en/
-    - assets/sounds/cs/
+    - assets/sounds/en/0.mp3
+    - assets/sounds/en/1.mp3
+    - assets/sounds/en/2.mp3
+    - assets/sounds/en/3.mp3
+    - assets/sounds/en/4.mp3
+    - assets/sounds/en/5.mp3
+    - assets/sounds/en/6.mp3
+    - assets/sounds/en/7.mp3
+    - assets/sounds/en/8.mp3
+    - assets/sounds/en/9.mp3
+    - assets/sounds/cs/0.mp3
+    - assets/sounds/cs/1.mp3
+    - assets/sounds/cs/2.mp3
+    - assets/sounds/cs/3.mp3
+    - assets/sounds/cs/4.mp3
+    - assets/sounds/cs/5.mp3
+    - assets/sounds/cs/6.mp3
+    - assets/sounds/cs/7.mp3
+    - assets/sounds/cs/8.mp3
+    - assets/sounds/cs/9.mp3

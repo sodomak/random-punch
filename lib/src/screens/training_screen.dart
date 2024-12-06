@@ -191,7 +191,7 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
     final initialRemainingTime = _remainingTime.inSeconds;
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_isPaused) {
+      if (!mounted || _isPaused) {
         timer.cancel();
         return;
       }
@@ -199,6 +199,8 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
       final elapsedTime = DateTime.now().difference(startTime).inSeconds;
       final newRemainingTime = initialRemainingTime - elapsedTime;
 
+      if (!mounted) return;
+      
       setState(() {
         _remainingTime = Duration(seconds: max(0, newRemainingTime));
       });
@@ -206,17 +208,18 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
       if (newRemainingTime <= 0) {
         timer.cancel();
         if (_isBreak) {
-          // Add exact break time
           _breakTimeSeconds += widget.settings.breakLength.inSeconds;
-          _startRound();
+          if (mounted) _startRound();
         } else {
-          _startBreak();
+          if (mounted) _startBreak();
         }
       }
     });
   }
 
   void _scheduleNextNumbers() {
+    if (!mounted) return;
+    
     final intervalSeconds = _random.nextInt(
           widget.settings.maxInterval.inSeconds - 
           widget.settings.minInterval.inSeconds + 1,
@@ -225,6 +228,7 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
     _timer = Timer(
       Duration(seconds: intervalSeconds),
       () {
+        if (!mounted) return;
         _generateNumbers();
         if (!_isBreak && mounted) {
           _scheduleNextNumbers();
@@ -253,10 +257,14 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
         );
       }
       
+      debugPrint('Generated new numbers: $newNumbers');
       _currentNumbers = newNumbers;
       _combinationsThrown++;
       _punchesThrown += newNumbers.length;
     });
+    
+    debugPrint('Starting to play generated numbers');
+    _playNumberSequence(_currentNumbers);
   }
 
   String _formatTime(int totalSeconds) {
@@ -317,19 +325,19 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
   }
 
   Future<void> _playNumberSequence(List<int> numbers) async {
+    if (!mounted) return;
+    
+    debugPrint('Starting to play number sequence: $numbers');
     final locale = Localizations.localeOf(context);
+    debugPrint('Using locale: ${locale.languageCode}');
+    
     for (final number in numbers) {
-      final player = await _soundService.playNumber(number, locale.languageCode);
-      if (player != null) {
-        try {
-          await player.playerStateStream.firstWhere(
-            (state) => state.processingState == ProcessingState.completed
-          );
-        } finally {
-          player.dispose();
-        }
-      }
+      if (!mounted) break;
+      debugPrint('Attempting to play number: $number');
+      await _soundService.playNumber(number, locale.languageCode);
+      debugPrint('Finished playing number: $number');
     }
+    debugPrint('Finished playing sequence: $numbers');
   }
 
   @override
