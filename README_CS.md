@@ -40,5 +40,16 @@ Tréninková aplikace pro MMA/box, která pomáhá sportovcům cvičit techniky 
 - Zvukové efekty pro tréninkové události (start, konec, pauzy)
 - Možnost ztlumení zvuku pro tichý trénink
 
+### Snímky obrazovky
+
+<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+    <img src="screenshots/1.main.png" width="200" alt="Hlavní obrazovka">
+    <img src="screenshots/2.settings.png" width="200" alt="Nastavení - Čas">
+    <img src="screenshots/3.settings.png" width="200" alt="Nastavení - Čísla">
+    <img src="screenshots/4.training.png" width="200" alt="Tréninková obrazovka">
+    <img src="screenshots/5.finished_training.png" width="200" alt="Shrnutí tréninku">
+    <img src="screenshots/6.stats.png" width="200" alt="Obrazovka statistik">
+</div>
+
 ## Licence
 GNU General Public License v3.0 
