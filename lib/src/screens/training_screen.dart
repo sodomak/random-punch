@@ -120,6 +120,7 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
       _isBreak = false;
       _remainingTime = widget.settings.roundLength;
       _roundStartTime = DateTime.now();  // Start tracking round time
+      _currentNumbers = []; // Clear the numbers when new round starts
     });
     _soundService.playStart();
     _startTimer();
@@ -134,6 +135,7 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
     
     setState(() {
       _completedRounds++;
+      _currentNumbers = []; // Clear the numbers when break starts
     });
 
     if (_completedRounds >= widget.settings.numberOfRounds) {
