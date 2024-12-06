@@ -54,8 +54,14 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Debug Env
+        run: |
+          echo "KEYSTORE_FILE exists: ${{ env.KEYSTORE_FILE != '' }}"
+          echo "KEY_ALIAS exists: ${{ env.KEY_ALIAS != '' }}"
+          echo "Keystore path exists: $(test -f android/app/${{ env.KEYSTORE_FILE }} && echo 'true' || echo 'false')"
+
       - name: Build APK
-        run: flutter build apk --release
+        run: flutter build apk --release --verbose
 
       - name: Generate changelog
         id: changelog
