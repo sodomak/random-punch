@@ -135,6 +135,168 @@ class _SettingsScreenState extends State<SettingsScreen> {
         seconds: int.parse(_breakSeconds.text),
       );
 
+  Widget _buildLanguageSelector(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      children: [
+        ChoiceChip(
+          label: const Text('English'),
+          selected: Localizations.localeOf(context).languageCode == 'en',
+          onSelected: (selected) {
+            if (selected) widget.onLocaleChanged(const Locale('en', ''));
+          },
+        ),
+        ChoiceChip(
+          label: const Text('Čeština'),
+          selected: Localizations.localeOf(context).languageCode == 'cs',
+          onSelected: (selected) {
+            if (selected) widget.onLocaleChanged(const Locale('cs', ''));
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildThemeSelector() {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.theme, style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        SwitchListTile(
+          title: Text(_isDarkMode ? l10n.darkTheme : l10n.lightTheme),
+          value: _isDarkMode,
+          onChanged: (value) {
+            setState(() {
+              _isDarkMode = value;
+              widget.onThemeChanged(value);
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNumberSelector() {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: List.generate(10, (index) {
+        return FilterChip(
+          label: Text('$index'),
+          selected: _selectedNumbers.contains(index),
+          onSelected: (selected) {
+            setState(() {
+              if (selected) {
+                _selectedNumbers.add(index);
+              } else {
+                _selectedNumbers.remove(index);
+              }
+            });
+          },
+        );
+      }),
+    );
+  }
+
+  Widget _buildNumberCountSelector(AppLocalizations l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: RadioListTile<bool>(
+                title: Text(l10n.fixedCount),
+                value: true,
+                groupValue: _isFixedNumberCount,
+                onChanged: (value) {
+                  setState(() {
+                    _isFixedNumberCount = value!;
+                  });
+                },
+              ),
+            ),
+            Expanded(
+              child: RadioListTile<bool>(
+                title: Text(l10n.randomRange),
+                value: false,
+                groupValue: _isFixedNumberCount,
+                onChanged: (value) {
+                  setState(() {
+                    _isFixedNumberCount = value!;
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (_isFixedNumberCount)
+          NumberSettingsField(
+            label: l10n.numberOfDigits,
+            value: int.parse(_fixedNumberCount.text),
+            onChanged: (value) => setState(() => _fixedNumberCount.text = value.toString()),
+            minValue: 1,
+            maxValue: _selectedNumbers.length,
+          )
+        else
+          Row(
+            children: [
+              Expanded(
+                child: NumberSettingsField(
+                  label: l10n.minimumDigits,
+                  value: int.parse(_minNumberCount.text),
+                  onChanged: (value) => setState(() => _minNumberCount.text = value.toString()),
+                  minValue: 1,
+                  maxValue: _selectedNumbers.length,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: NumberSettingsField(
+                  label: l10n.maximumDigits,
+                  value: int.parse(_maxNumberCount.text),
+                  onChanged: (value) => setState(() => _maxNumberCount.text = value.toString()),
+                  minValue: int.parse(_minNumberCount.text),
+                  maxValue: _selectedNumbers.length,
+                ),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+
+  Widget _buildIntervalSelector() {
+    return Row(
+      children: [
+        Expanded(
+          child: NumberSettingsField(
+            label: 'Min',
+            value: int.parse(_minInterval.text),
+            onChanged: (value) => setState(() => _minInterval.text = value.toString()),
+            minValue: 1,
+            maxValue: int.parse(_maxInterval.text),
+            suffix: 'sec',
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: NumberSettingsField(
+            label: 'Max',
+            value: int.parse(_maxInterval.text),
+            onChanged: (value) => setState(() => _maxInterval.text = value.toString()),
+            minValue: int.parse(_minInterval.text),
+            maxValue: 60,
+            suffix: 'sec',
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -144,188 +306,100 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: Text(l10n.settings),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         children: [
-          Text('Language / Jazyk'),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: [
-              ChoiceChip(
-                label: const Text('English'),
-                selected: Localizations.localeOf(context).languageCode == 'en',
-                onSelected: (selected) {
-                  if (selected) {
-                    widget.onLocaleChanged(const Locale('en', ''));
-                  }
-                },
-              ),
-              ChoiceChip(
-                label: const Text('Čeština'),
-                selected: Localizations.localeOf(context).languageCode == 'cs',
-                onSelected: (selected) {
-                  if (selected) {
-                    widget.onLocaleChanged(const Locale('cs', ''));
-                  }
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          NumberSettingsField(
-            label: l10n.countdownLength,
-            value: int.parse(_countdownSeconds.text),
-            onChanged: (value) => setState(() => _countdownSeconds.text = value.toString()),
-            maxValue: 60,
-            suffix: 'sec',
-          ),
-          const SizedBox(height: 16),
-          TimeSettingsField(
-            label: l10n.roundLength,
-            duration: roundLength,
-            onChanged: (duration) {
-              setState(() {
-                _roundMinutes.text = duration.inMinutes.toString();
-                _roundSeconds.text = (duration.inSeconds % 60).toString();
-              });
-            },
-          ),
-          const SizedBox(height: 24),
-          TimeSettingsField(
-            label: l10n.breakLength,
-            duration: breakLength,
-            onChanged: (duration) {
-              setState(() {
-                _breakMinutes.text = duration.inMinutes.toString();
-                _breakSeconds.text = (duration.inSeconds % 60).toString();
-              });
-            },
-          ),
-          const SizedBox(height: 16),
-          NumberSettingsField(
-            label: l10n.numberOfRounds,
-            value: int.parse(_numberOfRounds.text),
-            onChanged: (value) => setState(() => _numberOfRounds.text = value.toString()),
-            minValue: 1,
-            maxValue: 99,
-          ),
-          const SizedBox(height: 16),
-          Text(l10n.selectNumbers),
-          Wrap(
-            spacing: 8,
-            children: List.generate(10, (index) {
-              return FilterChip(
-                label: Text('$index'),
-                selected: _selectedNumbers.contains(index),
-                onSelected: (selected) {
-                  setState(() {
-                    if (selected) {
-                      _selectedNumbers.add(index);
-                    } else {
-                      _selectedNumbers.remove(index);
-                    }
-                  });
-                },
-              );
-            }),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Text(l10n.numbersToShow),
-              const Spacer(),
-              Switch(
-                value: _isFixedNumberCount,
-                onChanged: (value) {
-                  setState(() {
-                    _isFixedNumberCount = value;
-                  });
-                },
-              ),
-              Text(_isFixedNumberCount ? l10n.fixedCount : l10n.randomRange),
-            ],
-          ),
-          if (_isFixedNumberCount)
-            NumberSettingsField(
-              label: l10n.numberOfDigits,
-              value: int.parse(_fixedNumberCount.text),
-              onChanged: (value) => setState(() => _fixedNumberCount.text = value.toString()),
-              minValue: 1,
-              maxValue: 10,
-            )
-          else
-            Row(
-              children: [
-                Expanded(
-                  child: NumberSettingsField(
-                    label: l10n.minimumDigits,
-                    value: int.parse(_minNumberCount.text),
-                    onChanged: (value) => setState(() => _minNumberCount.text = value.toString()),
-                    minValue: 1,
-                    maxValue: int.parse(_maxNumberCount.text),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Appearance',
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: NumberSettingsField(
-                    label: l10n.maximumDigits,
-                    value: int.parse(_maxNumberCount.text),
-                    onChanged: (value) => setState(() => _maxNumberCount.text = value.toString()),
-                    minValue: int.parse(_minNumberCount.text),
-                    maxValue: 10,
-                  ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  _buildLanguageSelector(context),
+                  const SizedBox(height: 16),
+                  _buildThemeSelector(),
+                ],
+              ),
             ),
-          const SizedBox(height: 16),
-          Text(l10n.intervalBetweenNumbers),
-          Row(
-            children: [
-              Expanded(
-                child: NumberSettingsField(
-                  label: 'Minimum',
-                  value: int.parse(_minInterval.text),
-                  onChanged: (value) => setState(() => _minInterval.text = value.toString()),
-                  minValue: 1,
-                  maxValue: int.parse(_maxInterval.text),
-                  suffix: 'sec',
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: NumberSettingsField(
-                  label: 'Maximum',
-                  value: int.parse(_maxInterval.text),
-                  onChanged: (value) => setState(() => _maxInterval.text = value.toString()),
-                  minValue: int.parse(_minInterval.text),
-                  maxValue: 30,
-                  suffix: 'sec',
-                ),
-              ),
-            ],
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Text(l10n.theme),
-              const Spacer(),
-              Switch(
-                value: _isDarkMode,
-                onChanged: (value) {
-                  setState(() {
-                    _isDarkMode = value;
-                  });
-                  widget.onThemeChanged(value);
-                },
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Training Setup',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 16),
+                  NumberSettingsField(
+                    label: l10n.countdownLength,
+                    value: int.parse(_countdownSeconds.text),
+                    onChanged: (value) => setState(() => _countdownSeconds.text = value.toString()),
+                    maxValue: 60,
+                    suffix: 'sec',
+                  ),
+                  const SizedBox(height: 16),
+                  TimeSettingsField(
+                    label: l10n.roundLength,
+                    duration: roundLength,
+                    onChanged: (duration) {
+                      setState(() {
+                        _roundMinutes.text = duration.inMinutes.toString();
+                        _roundSeconds.text = (duration.inSeconds % 60).toString();
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TimeSettingsField(
+                    label: l10n.breakLength,
+                    duration: breakLength,
+                    onChanged: (duration) {
+                      setState(() {
+                        _breakMinutes.text = duration.inMinutes.toString();
+                        _breakSeconds.text = (duration.inSeconds % 60).toString();
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  NumberSettingsField(
+                    label: l10n.numberOfRounds,
+                    value: int.parse(_numberOfRounds.text),
+                    onChanged: (value) => setState(() => _numberOfRounds.text = value.toString()),
+                    minValue: 1,
+                    maxValue: 99,
+                  ),
+                ],
               ),
-              Text(_isDarkMode ? l10n.darkTheme : l10n.lightTheme),
-            ],
+            ),
           ),
-          const SizedBox(height: 24),
-          Center(
-            child: ElevatedButton(
-              onPressed: _saveSettings,
-              child: Text(l10n.save),
+          const SizedBox(height: 16),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Numbers Configuration',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(l10n.selectNumbers),
+                  _buildNumberSelector(),
+                  const SizedBox(height: 16),
+                  _buildNumberCountSelector(l10n),
+                  const SizedBox(height: 16),
+                  Text(l10n.intervalBetweenNumbers),
+                  _buildIntervalSelector(),
+                ],
+              ),
             ),
           ),
         ],
