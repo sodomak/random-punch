@@ -85,17 +85,11 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _loadLanguageSettings() async {
-    try {
-      final settingsService = SettingsService();
-      final savedLanguage = await settingsService.getLanguage();
-      debugPrint('Loading saved language: $savedLanguage');
-      setState(() {
-        _locale = Locale(savedLanguage, '');
-      });
-      debugPrint('Set locale to: ${_locale.languageCode}');
-    } catch (e) {
-      debugPrint('Error loading language settings: $e');
-    }
+    final savedLanguage = await SettingsService().getLanguage();
+    setState(() {
+      _locale = Locale(savedLanguage, '');
+    });
+    await _soundService.initialize(savedLanguage);
   }
 
   void _setLocale(Locale locale) async {
@@ -105,7 +99,8 @@ class _MyAppState extends State<MyApp> {
     try {
       final settingsService = SettingsService();
       await settingsService.setLanguage(locale.languageCode);
-      debugPrint('Saved language: ${locale.languageCode}');
+      await _soundService.initialize(locale.languageCode);
+      debugPrint('Set locale to: ${locale.languageCode}');
     } catch (e) {
       debugPrint('Error saving language setting: $e');
     }

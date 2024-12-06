@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 class SoundService {
   bool _isMuted = false;
   bool _isInitialized = false;
+  String? _currentLanguage;
   static const String _muteKey = 'isMuted';
 
   SoundService() {
@@ -22,24 +23,30 @@ class SoundService {
     await prefs.setBool(_muteKey, _isMuted);
   }
 
-  Future<void> initialize() async {
-    if (_isInitialized) return;
+  Future<void> initialize([String? languageCode]) async {
+    if (_isInitialized && languageCode == _currentLanguage) return;
     
     try {
+      // Clear any existing resources
+      await AudioPlayer.clearAssetCache();
+      
       if (kIsWeb) {
-        await AudioPlayer.clearAssetCache();
-        
-        // Pre-initialize audio context and test with a simple sound
+        // Pre-initialize audio context and test with the current language
         final testPlayer = AudioPlayer();
-        await testPlayer.setAsset('assets/sounds/countdown.mp3');
+        final testPath = languageCode != null ? 
+          'assets/sounds/$languageCode/1.mp3' : 
+          'assets/sounds/countdown.mp3';
+          
+        await testPlayer.setAsset(testPath);
         await testPlayer.seek(Duration.zero);
         await testPlayer.setVolume(0);
         await testPlayer.play();
         await testPlayer.stop();
         await testPlayer.dispose();
         
-        debugPrint('Web audio context initialized successfully');
+        debugPrint('Web audio context initialized successfully for language: $languageCode');
       }
+      _currentLanguage = languageCode;
       _isInitialized = true;
       debugPrint('SoundService initialized successfully');
     } catch (e) {
