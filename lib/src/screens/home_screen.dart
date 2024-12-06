@@ -1,22 +1,30 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../services/settings_service.dart';
+import '../services/sound_service.dart';
 import 'settings_screen.dart';
 import 'training_screen.dart';
 import 'about_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   final void Function(Locale) onLocaleChanged;
   final void Function(bool) onThemeChanged;
   final bool isDarkMode;
+  final SoundService soundService;
 
   const HomeScreen({
     super.key,
     required this.onLocaleChanged,
     required this.onThemeChanged,
     required this.isDarkMode,
+    required this.soundService,
   });
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -25,6 +33,16 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                widget.soundService.toggleMute();
+              });
+            },
+            icon: Icon(
+              widget.soundService.isMuted ? Icons.volume_off : Icons.volume_up,
+            ),
+          ),
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'about') {
@@ -60,7 +78,10 @@ class HomeScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => TrainingScreen(settings: settings),
+                      builder: (context) => TrainingScreen(
+                        settings: settings,
+                        soundService: widget.soundService,
+                      ),
                     ),
                   );
                 },
@@ -95,9 +116,9 @@ class HomeScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => SettingsScreen(
-                        onLocaleChanged: onLocaleChanged,
-                        onThemeChanged: onThemeChanged,
-                        isDarkMode: isDarkMode,
+                        onLocaleChanged: widget.onLocaleChanged,
+                        onThemeChanged: widget.onThemeChanged,
+                        isDarkMode: widget.isDarkMode,
                       ),
                     ),
                   );

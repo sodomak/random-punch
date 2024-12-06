@@ -8,6 +8,7 @@ import 'src/screens/home_screen.dart';
 import 'src/l10n/app_localizations.dart';
 import 'src/services/settings_service.dart';
 import 'src/services/theme_service.dart';
+import 'src/services/sound_service.dart';
 
 void main() {
   runZonedGuarded(() async {
@@ -57,42 +58,46 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   Locale _locale = const Locale('en', '');
   bool _isDarkMode = false;
-  final _settingsService = SettingsService();
+  final _soundService = SoundService();
   final _themeService = ThemeService();
 
   @override
   void initState() {
     super.initState();
-    _loadLanguage();
-    _loadTheme();
+    _initServices();
   }
 
-  Future<void> _loadLanguage() async {
-    final languageCode = await _settingsService.getLanguage();
-    setState(() {
-      _locale = Locale(languageCode, '');
-    });
+  Future<void> _initServices() async {
+    await _soundService.initialize();
+    await _loadThemeSettings();
   }
 
-  Future<void> _loadTheme() async {
-    final isDark = await _themeService.isDarkMode();
-    setState(() {
-      _isDarkMode = isDark;
-    });
+  Future<void> _loadThemeSettings() async {
+    try {
+      final isDark = await _themeService.isDarkMode();
+      setState(() {
+        _isDarkMode = isDark;
+      });
+    } catch (e) {
+      debugPrint('Error loading theme settings: $e');
+    }
   }
 
-  void _setLocale(Locale locale) async {
-    await _settingsService.setLanguage(locale.languageCode);
+  void _setLocale(Locale locale) {
     setState(() {
       _locale = locale;
     });
   }
 
-  void _setThemeMode(bool isDark) async {
-    await _themeService.setThemeMode(isDark);
+  void _setThemeMode(bool isDarkMode) async {
     setState(() {
-      _isDarkMode = isDark;
+      _isDarkMode = isDarkMode;
     });
+    try {
+      await _themeService.setThemeMode(isDarkMode);
+    } catch (e) {
+      debugPrint('Error saving theme settings: $e');
+    }
   }
 
   @override
@@ -129,6 +134,7 @@ class _MyAppState extends State<MyApp> {
         onLocaleChanged: _setLocale,
         onThemeChanged: _setThemeMode,
         isDarkMode: _isDarkMode,
+        soundService: _soundService,
       ),
     );
   }

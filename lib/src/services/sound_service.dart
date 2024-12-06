@@ -1,19 +1,37 @@
-import 'package:just_audio/just_audio.dart';
-import 'dart:async';
 import 'dart:developer' as developer;
+import 'package:just_audio/just_audio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SoundService {
   bool _isMuted = false;
   bool _isInitialized = false;
+  static const String _muteKey = 'isMuted';
+
+  SoundService() {
+    _loadMuteState();
+  }
+
+  Future<void> _loadMuteState() async {
+    final prefs = await SharedPreferences.getInstance();
+    _isMuted = prefs.getBool(_muteKey) ?? false;
+  }
+
+  Future<void> _saveMuteState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_muteKey, _isMuted);
+  }
+
+  Future<void> initialize() async {
+    _isInitialized = true;
+    await _loadMuteState();
+  }
 
   bool get isMuted => _isMuted;
 
-  Future<void> initialize() async {
-    developer.log('Initializing SoundService');
-    if (_isInitialized) return;
-
-    _isInitialized = true;
-    developer.log('SoundService initialized');
+  void toggleMute() {
+    _isMuted = !_isMuted;
+    _saveMuteState();
+    developer.log('SoundService mute toggled: $_isMuted');
   }
 
   Future<AudioPlayer> _createPlayer(String assetPath) async {
@@ -69,11 +87,6 @@ class SoundService {
     } catch (e) {
       developer.log('Error playing finish sound: $e', error: e);
     }
-  }
-
-  void toggleMute() {
-    _isMuted = !_isMuted;
-    developer.log('SoundService mute toggled: $_isMuted');
   }
 
   void dispose() {

@@ -11,6 +11,7 @@ class TrainingSettings {
   final Duration maxInterval;
   final String name;
   final int numberOfRounds;
+  bool isDarkMode;
 
   TrainingSettings({
     this.roundLength = const Duration(minutes: 3),
@@ -25,6 +26,7 @@ class TrainingSettings {
     this.maxInterval = const Duration(seconds: 10),
     this.name = 'Default',
     this.numberOfRounds = 3,
+    this.isDarkMode = false,
   });
 
   TrainingSettings copyWith({
@@ -40,6 +42,7 @@ class TrainingSettings {
     Duration? maxInterval,
     String? name,
     int? numberOfRounds,
+    bool? isDarkMode,
   }) {
     return TrainingSettings(
       roundLength: roundLength ?? this.roundLength,
@@ -54,6 +57,7 @@ class TrainingSettings {
       maxInterval: maxInterval ?? this.maxInterval,
       name: name ?? this.name,
       numberOfRounds: numberOfRounds ?? this.numberOfRounds,
+      isDarkMode: isDarkMode ?? this.isDarkMode,
     );
   }
 
@@ -71,6 +75,41 @@ class TrainingSettings {
       maxInterval: const Duration(seconds: 10),
       name: 'Default',
       numberOfRounds: 3,
+      isDarkMode: false,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'roundLength': roundLength.inSeconds,
+    'breakLength': breakLength.inSeconds,
+    'countdownLength': countdownLength.inSeconds,
+    'selectedNumbers': selectedNumbers,
+    'isFixedNumberCount': isFixedNumberCount,
+    'fixedNumberCount': fixedNumberCount,
+    'minNumberCount': minNumberCount,
+    'maxNumberCount': maxNumberCount,
+    'minInterval': minInterval.inSeconds,
+    'maxInterval': maxInterval.inSeconds,
+    'name': name,
+    'numberOfRounds': numberOfRounds,
+    'isDarkMode': isDarkMode,
+  };
+
+  factory TrainingSettings.fromJson(Map<String, dynamic> json) {
+    return TrainingSettings(
+      roundLength: Duration(seconds: json['roundLength'] ?? 0),
+      breakLength: Duration(seconds: json['breakLength'] ?? 0),
+      countdownLength: Duration(seconds: json['countdownLength'] ?? 0),
+      selectedNumbers: json['selectedNumbers'] ?? [],
+      isFixedNumberCount: json['isFixedNumberCount'] ?? true,
+      fixedNumberCount: json['fixedNumberCount'] ?? 1,
+      minNumberCount: json['minNumberCount'] ?? 1,
+      maxNumberCount: json['maxNumberCount'] ?? 4,
+      minInterval: Duration(seconds: json['minInterval'] ?? 0),
+      maxInterval: Duration(seconds: json['maxInterval'] ?? 0),
+      name: json['name'] ?? 'Default',
+      numberOfRounds: json['numberOfRounds'] ?? 3,
+      isDarkMode: json['isDarkMode'] ?? false,
     );
   }
 } 

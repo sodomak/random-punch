@@ -8,10 +8,12 @@ import 'package:flutter/services.dart';
 
 class TrainingScreen extends StatefulWidget {
   final TrainingSettings settings;
+  final SoundService soundService;
 
   const TrainingScreen({
     super.key,
     required this.settings,
+    required this.soundService,
   });
 
   @override
@@ -27,22 +29,20 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
   late Duration _remainingTime;
   int _currentRound = 1;
   bool _isFinished = false;
-  final SoundService _soundService = SoundService();
   Timer? _countdownTimer;
   Timer? _timer;
   bool _isPaused = false;
+  DateTime? _pauseTime;
+  Duration? _remainingAtPause;
+
+  SoundService get _soundService => widget.soundService;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _remainingTime = Duration.zero;
-    _initializeSoundService();
     _keepScreenOn();
-  }
-
-  Future<void> _initializeSoundService() async {
-    await _soundService.initialize();
     _startCountdown();
   }
 
@@ -105,59 +105,49 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
   }
 
   void _startRound() {
-    _timer?.cancel();
-    _soundService.playStart();
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        setState(() {
-          _isBreak = false;
-          _remainingTime = widget.settings.roundLength;
-          _isPaused = false;
-          _currentNumbers = [];
-        });
-        _startTimer();
-        _scheduleNextNumbers();
-      }
+    setState(() {
+      _isBreak = false;
+      _remainingTime = widget.settings.roundLength;
     });
+    _soundService.playStart();
+    _startTimer();
+    _scheduleNextNumbers();
   }
 
   void _startBreak() {
-    _timer?.cancel();
-
-    if (_currentRound + 1 > widget.settings.numberOfRounds) {
-      _soundService.playFinish();
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (mounted) {
-          setState(() {
-            _isFinished = true;
-            _currentNumbers = [];
-            _isPaused = false;
-          });
-        }
-      });
+    if (_currentRound >= widget.settings.numberOfRounds) {
+      _finishTraining();
       return;
     }
 
+    setState(() {
+      _isBreak = true;
+      _remainingTime = widget.settings.breakLength;
+      _currentRound++;
+    });
     _soundService.playEnd();
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        setState(() {
-          _isBreak = true;
-          _currentRound++;
-          _remainingTime = widget.settings.breakLength;
-          _currentNumbers = [];
-          _isPaused = false;
-        });
-        _startTimer();
-      }
+    _startTimer();
+  }
+
+  void _finishTraining() {
+    _soundService.playFinish();
+    _timer?.cancel();
+    setState(() {
+      _isFinished = true;
     });
   }
 
   void _startTimer() {
+    _timer?.cancel();
     final startTime = DateTime.now();
     final initialRemainingTime = _remainingTime.inSeconds;
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_isPaused) {
+        timer.cancel();
+        return;
+      }
+
       final elapsedTime = DateTime.now().difference(startTime).inSeconds;
       final newRemainingTime = initialRemainingTime - elapsedTime;
 
@@ -236,100 +226,232 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
     setState(() {
       _isPaused = !_isPaused;
       if (_isPaused) {
+        // Pause
+        _pauseTime = DateTime.now();
+        _remainingAtPause = _remainingTime;
         _timer?.cancel();
+        _timer = null;
       } else {
-        _startTimer();
+        // Resume
+        if (_pauseTime != null && _remainingAtPause != null) {
+          _remainingTime = _remainingAtPause!;
+          _startTimer();
+          if (!_isBreak) {
+            _scheduleNextNumbers();
+          }
+        }
       }
     });
+  }
+
+  void _pauseTimer() {
+    _togglePause();
+  }
+
+  void _resumeTimer() {
+    _togglePause();
+  }
+
+  void _stopTraining() {
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    
+    if (_isCountingDown) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.training),
+          actions: [
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  _soundService.toggleMute();
+                });
+              },
+              icon: Icon(
+                _soundService.isMuted ? Icons.volume_off : Icons.volume_up,
+              ),
+            ),
+          ],
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                l10n.getReady,
+                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 32),
+              Text(
+                _countdown.toString(),
+                style: const TextStyle(fontSize: 72, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_isFinished) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.training),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                l10n.trainingFinished,
+                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 48),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: _restartTraining,
+                    icon: const Icon(Icons.repeat),
+                    label: Text(l10n.repeat),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.home),
+                    label: Text(l10n.backToHome),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.training),
         actions: [
-          if (!_isCountingDown && !_isFinished)
-            IconButton(
-              icon: Icon(_isPaused ? Icons.play_arrow : Icons.pause),
-              onPressed: _togglePause,
-              tooltip: _isPaused ? l10n.resume : l10n.pause,
-            ),
           IconButton(
-            icon: Icon(
-              _soundService.isMuted ? Icons.volume_off : Icons.volume_up,
-              size: 28,
-            ),
             onPressed: () {
               setState(() {
                 _soundService.toggleMute();
               });
             },
-            tooltip: _soundService.isMuted ? l10n.unmute : l10n.mute,
+            icon: Icon(
+              _soundService.isMuted ? Icons.volume_off : Icons.volume_up,
+            ),
           ),
-          const SizedBox(width: 8),
         ],
       ),
-      body: Center(
+      body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (_isFinished) ...[
-              Text(
-                l10n.trainingFinished,
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 32),
-              Row(
+            // Round Progress Indicator
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton(
-                    onPressed: _restartTraining,
-                    child: Text(l10n.repeat),
-                  ),
-                  const SizedBox(width: 16),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(l10n.backToHome),
+                  Text(
+                    '${l10n.training} ${_currentRound}/${widget.settings.numberOfRounds}',
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
-            ] else if (_isCountingDown) ...[
-              Text(
-                l10n.getReady,
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                _countdown.toString(),
-                style: Theme.of(context).textTheme.displayLarge,
-              ),
-            ] else ...[
-              Text(
-                'Round $_currentRound',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _isBreak ? 'Break' : 'Training',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            ),
+            // Timer with Circular Progress
+            Expanded(
+              flex: 2,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: 200,
+                    height: 200,
+                    child: CircularProgressIndicator(
+                      value: _isBreak 
+                          ? _remainingTime.inSeconds / widget.settings.breakLength.inSeconds
+                          : _remainingTime.inSeconds / widget.settings.roundLength.inSeconds,
+                      strokeWidth: 8,
+                      backgroundColor: Colors.grey[300],
                       color: _isBreak ? Colors.orange : Colors.green,
                     ),
+                  ),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _formatDuration(_remainingTime),
+                        style: const TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        _isBreak ? l10n.break_ : l10n.training,
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: _isBreak ? Colors.orange : Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                _formatDuration(_remainingTime),
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 32),
-              if (!_isBreak)
-                Text(
-                  _currentNumbers.join(' '),
-                  style: Theme.of(context).textTheme.displayLarge,
+            ),
+            // Numbers Display
+            Expanded(
+              flex: 3,
+              child: Center(
+                child: Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  alignment: WrapAlignment.center,
+                  children: _currentNumbers.map((number) {
+                    return Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Center(
+                        child: Text(
+                          number.toString(),
+                          style: const TextStyle(
+                            fontSize: 48,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
-            ],
+              ),
+            ),
+            // Controls
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  IconButton.filled(
+                    onPressed: _togglePause,
+                    icon: Icon(_isPaused ? Icons.play_arrow : Icons.pause),
+                    iconSize: 32,
+                  ),
+                  IconButton.filled(
+                    onPressed: _stopTraining,
+                    icon: const Icon(Icons.stop),
+                    iconSize: 32,
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

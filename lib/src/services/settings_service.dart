@@ -7,7 +7,7 @@ class SettingsService {
   static const String _activeSettingKey = 'active_setting';
   static const String _languageKey = 'language_code';
   
-  Future<void> saveSettings(TrainingSettings settings, String name) async {
+  Future<void> saveSettings(String name, TrainingSettings settings) async {
     final prefs = await SharedPreferences.getInstance();
     final allSettings = await getSettingsList();
     
@@ -44,7 +44,7 @@ class SettingsService {
     if (settingsJson == null) {
       // If no settings exist, return and save default settings
       final defaultSettings = TrainingSettings.getDefault();
-      await saveSettings(defaultSettings, name);
+      await saveSettings(name, defaultSettings);
       return defaultSettings;
     }
     

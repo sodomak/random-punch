@@ -101,4 +101,7 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 
   assets:
-    - assets/sounds/
+    - assets/sounds/countdown.mp3
+    - assets/sounds/start.mp3
+    - assets/sounds/end.mp3
+    - assets/sounds/finish.mp3

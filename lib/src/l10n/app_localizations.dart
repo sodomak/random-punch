@@ -39,6 +39,7 @@ abstract class AppLocalizations {
   String get theme;
   String get lightTheme;
   String get darkTheme;
+  String get break_;
 }
 
 class AppLocalizationsEn extends AppLocalizations {
@@ -110,6 +111,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lightTheme => 'Light';
   @override
   String get darkTheme => 'Dark';
+  @override
+  String get break_ => 'Break';
 }
 
 class AppLocalizationsCs extends AppLocalizations {
@@ -181,4 +184,6 @@ class AppLocalizationsCs extends AppLocalizations {
   String get lightTheme => 'Světlé';
   @override
   String get darkTheme => 'Tmavé';
+  @override
+  String get break_ => 'Pauza';
 } 

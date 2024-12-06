@@ -110,7 +110,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
 
     try {
-      await _settingsService.saveSettings(settings, 'Default');
+      await _settingsService.saveSettings('Default', settings);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Settings saved')),
