@@ -38,11 +38,20 @@ android {
 
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
 }
 
 flutter {
     source = "../.."
+}
+
+signingConfigs {
+    release {
+        storeFile file(findProperty('KEYSTORE_FILE') ?: "upload-keystore.jks")
+        storePassword System.getenv('STORE_PASSWORD')
+        keyAlias System.getenv('KEY_ALIAS')
+        keyPassword System.getenv('KEY_PASSWORD')
+    }
 }
