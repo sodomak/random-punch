@@ -9,10 +9,14 @@ import 'src/l10n/app_localizations.dart';
 import 'src/services/settings_service.dart';
 import 'src/services/theme_service.dart';
 import 'src/services/sound_service.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
+late PackageInfo packageInfo;
 
 void main() {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    packageInfo = await PackageInfo.fromPlatform();
     
     FlutterError.onError = (FlutterErrorDetails details) async {
       // Log to file
@@ -33,12 +37,28 @@ void main() {
 
 Future<void> _logError(dynamic error, StackTrace? stack) async {
   try {
+    final settingsService = SettingsService();
+    final isDebugMode = await settingsService.isDebugMode();
+    
+    if (!isDebugMode && !kDebugMode) return;
+    
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/error_log.txt');
     final timestamp = DateTime.now().toIso8601String();
+    final version = packageInfo.version;
+    final platform = Platform.operatingSystem;
+    
+    final logEntry = '''
+Timestamp: $timestamp
+Version: $version
+Platform: $platform
+Error: $error
+Stack trace: $stack
+
+''';
     
     await file.writeAsString(
-      '$timestamp\nError: $error\nStack trace: $stack\n\n',
+      logEntry,
       mode: FileMode.append,
     );
   } catch (e) {

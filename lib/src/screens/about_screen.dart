@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../version.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import '../services/settings_service.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -15,17 +17,34 @@ class AboutScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _shareLogs() async {
+  Future<void> _shareLogs(BuildContext context) async {
     try {
+      final l10n = AppLocalizations.of(context)!;
+      final settingsService = SettingsService();
+      final isDebugMode = await settingsService.isDebugMode();
+      
+      if (!isDebugMode && !kDebugMode) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.enableDebugMode)),
+          );
+        }
+        return;
+      }
+      
       final directory = await getApplicationDocumentsDirectory();
       final file = File('${directory.path}/error_log.txt');
       if (await file.exists()) {
-        await Share.shareFiles([file.path], text: 'App Error Logs');
+        await Share.shareFiles([file.path], text: 'App Debug Logs');
       } else {
-        print('No logs to share.');
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.noLogsAvailable)),
+          );
+        }
       }
     } catch (e) {
-      print('Error sharing logs: $e');
+      debugPrint('Error sharing logs: $e');
     }
   }
 
@@ -69,6 +88,11 @@ class AboutScreen extends StatelessWidget {
                   decoration: TextDecoration.underline,
                 ),
               ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.bug_report),
+              title: Text(l10n.shareLogs),
+              onTap: () => _shareLogs(context),
             ),
           ],
         ),

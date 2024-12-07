@@ -6,6 +6,7 @@ class SettingsService {
   static const String _settingsKey = 'training_settings';
   static const String _activeSettingKey = 'active_setting';
   static const String _languageKey = 'language_code';
+  static const String _debugModeKey = 'debug_mode';
   
   Future<void> saveSettings(String name, TrainingSettings settings) async {
     final prefs = await SharedPreferences.getInstance();
@@ -98,5 +99,15 @@ class SettingsService {
   Future<void> setLanguage(String languageCode) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_languageKey, languageCode);
+  }
+
+  Future<bool> isDebugMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_debugModeKey) ?? false;
+  }
+
+  Future<void> setDebugMode(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_debugModeKey, enabled);
   }
 }

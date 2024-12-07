@@ -80,6 +80,10 @@ abstract class AppLocalizations {
   String get helpVoiceAnnouncements;
   String get helpSoundEffects;
   String get helpMutableAudio;
+  String get debugMode;
+  String get shareLogs;
+  String get enableDebugMode;
+  String get noLogsAvailable;
 }
 
 class AppLocalizationsEn extends AppLocalizations {
@@ -233,6 +237,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpSoundEffects => 'Sound effects for training events (start, end, breaks)';
   @override
   String get helpMutableAudio => 'Mutable audio for quiet training sessions';
+  @override
+  String get debugMode => 'Debug Mode';
+  @override
+  String get shareLogs => 'Share Debug Logs';
+  @override
+  String get enableDebugMode => 'Enable debug mode in settings to share logs';
+  @override
+  String get noLogsAvailable => 'No debug logs available';
 }
 
 class AppLocalizationsCs extends AppLocalizations {
@@ -386,4 +398,12 @@ class AppLocalizationsCs extends AppLocalizations {
   String get helpSoundEffects => 'Zvukové efekty pro tréninkové události (začátek, konec, pauzy)';
   @override
   String get helpMutableAudio => 'Měnitelný zvuk pro tišší tréninky';
+  @override
+  String get debugMode => 'Ladící režim';
+  @override
+  String get shareLogs => 'Sdílet protokoly';
+  @override
+  String get enableDebugMode => 'Pro sdílení protokolů povolte ladící režim v nastavení';
+  @override
+  String get noLogsAvailable => 'Žádné protokoly nejsou k dispozici';
 } 

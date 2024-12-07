@@ -40,6 +40,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isFixedNumberCount = true;
   final Set<int> _selectedNumbers = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   late bool _isDarkMode;
+  bool _isDebugMode = false;
 
   @override
   void dispose() {
@@ -64,6 +65,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.initState();
     _loadSettings();
     _isDarkMode = widget.isDarkMode;
+    _loadDebugMode();
   }
 
   Future<void> _loadSettings() async {
@@ -297,6 +299,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _loadDebugMode() async {
+    final debugMode = await _settingsService.isDebugMode();
+    setState(() {
+      _isDebugMode = debugMode;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -400,6 +409,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _buildIntervalSelector(),
                 ],
               ),
+            ),
+          ),
+          ListTile(
+            title: Text(l10n.debugMode),
+            trailing: Switch(
+              value: _isDebugMode,
+              onChanged: (bool value) async {
+                await _settingsService.setDebugMode(value);
+                setState(() {
+                  _isDebugMode = value;
+                });
+              },
             ),
           ),
         ],
