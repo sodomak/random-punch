@@ -4,6 +4,24 @@
 
 Tréninková aplikace pro MMA/box, která pomáhá sportovcům cvičit techniky a kombinace pomocí náhodně zobrazovaných čísel.
 
+## Instalace
+
+### Android
+1. Stáhněte si APK soubor z [nejnovější verze](https://github.com/sodomak/random-punch/releases/latest)
+2. Na vašem Android zařízení klepněte na stažený APK soubor
+3. Pokud budete vyzváni, povolte instalaci z neznámých zdrojů
+4. Postupujte podle pokynů pro instalaci na Androidu
+5. Po instalaci najdete "Random Punch" v seznamu aplikací
+
+**Poznámka k bezpečnostním upozorněním:** Při instalaci se může zobrazit varování Google Play Protect s textem "Nebezpečná aplikace byla zablokována" nebo že "nezná vývojáře této aplikace". Toto je běžné pro aplikace instalované mimo Google Play Store a neznamená to problém s aplikací. Pro pokračování v instalaci:
+1. Když se zobrazí varování, klepněte na "Další podrobnosti"
+2. Zvolte "Přesto nainstalovat" pro pokračování v instalaci
+3. Pokud budete dotázáni na odeslání aplikace ke kontrole, můžete zvolit libovolnou možnost - je to volitelné a neovlivní funkčnost aplikace
+
+Alternativně můžete instalovat přes [Obtainium](https://github.com/ImranR98/Obtainium).
+
+Poznámka: Aplikace je v současné době dostupná pouze pro Android.
+
 ## Rychlý průvodce
 
 1. **Začít trénink**: Klikněte na tlačítko "Začít Trénink" na hlavní obrazovce

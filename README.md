@@ -4,6 +4,27 @@
 
 A training app for MMA/boxing that helps athletes practice techniques and combinations through random number displays.
 
+## Installation
+
+### Android
+1. Download the APK file from the [latest release](https://github.com/sodomak/random-punch/releases/latest)
+2. On your Android device, tap the downloaded APK file
+3. If prompted, allow installation from unknown sources
+   - You may see a security warning about installing apps from unknown sources
+   - This is normal for apps installed outside of Google Play Store
+   - If needed, go to Settings > Security and enable "Install from unknown sources" or "Install unknown apps" for your browser
+4. Follow the Android installation prompts
+5. Once installed, you can find "Random Punch" in your app drawer
+
+**Note about security warnings:** When installing, you may see a Google Play Protect warning saying "Unsafe app blocked" or that it "doesn't recognize this app's developer". This is normal for apps installed outside of Google Play Store and doesn't indicate a problem with the app. To proceed with installation:
+1. When the warning appears, tap "More details"
+2. Choose "Install anyway" to continue with installation
+3. If asked about sending app for scanning, you can choose either option - this is optional and won't affect the app's functionality
+
+Alternatively, you can install via [Obtainium](https://github.com/ImranR98/Obtainium).
+
+Note: The app is currently available for Android only.
+
 ## Quick Start Guide
 
 1. **Start Training**: Click the "Start Training" button on the home screen
