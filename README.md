@@ -40,5 +40,16 @@ A training app for MMA/boxing that helps athletes practice techniques and combin
 - Sound effects for training events (start, end, breaks)
 - Mutable audio for quiet training sessions
 
+### Screenshots
+
+<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+    <img src="screenshots/1.main.png" width="200" alt="Main Screen">
+    <img src="screenshots/2.settings.png" width="200" alt="Settings Screen - Time">
+    <img src="screenshots/3.settings.png" width="200" alt="Settings Screen - Numbers">
+    <img src="screenshots/4.training.png" width="200" alt="Training Screen">
+    <img src="screenshots/5.finished_training.png" width="200" alt="Training Summary">
+    <img src="screenshots/6.stats.png" width="200" alt="Statistics Screen">
+</div>
+
 ## License
 GNU General Public License v3.0

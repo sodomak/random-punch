@@ -1,11 +1,11 @@
 {
-    "name": "random_punch",
-    "short_name": "random_punch",
+    "name": "Random Punch",
+    "short_name": "Random Punch",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "A training app for MMA/boxing that helps athletes practice techniques and combinations through random number displays.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
