@@ -1,0 +1,34 @@
+Categories:
+  - Sports & Health
+License: GPL-3.0-or-later
+AuthorName: Sodomak
+WebSite: https://github.com/sodomak/random-punch
+SourceCode: https://github.com/sodomak/random-punch
+IssueTracker: https://github.com/sodomak/random-punch/issues
+Changelog: https://github.com/sodomak/random-punch/releases
+
+AutoName: Random Punch
+
+RepoType: git
+Repo: https://github.com/sodomak/random-punch
+
+Builds:
+  - versionName: '1.1.0'
+    versionCode: 27
+    commit: v1.1.0
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.24.5
+    rm:
+      - ios
+      - macos
+      - windows
+    build:
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+      - $$flutter$$/bin/flutter build apk --release
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '1.1.0'
+CurrentVersionCode: 27 

@@ -169,7 +169,6 @@ class SoundService {
   }
 
   void dispose() {
-    _isInitialized = false;
     developer.log('Disposing SoundService');
   }
 } 

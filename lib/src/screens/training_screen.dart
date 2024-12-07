@@ -77,7 +77,6 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
     WidgetsBinding.instance.removeObserver(this);
     _countdownTimer?.cancel();
     _timer?.cancel();
-    _soundService.dispose();
     SystemChannels.platform.invokeMethod('SystemChrome.setKeepScreenOn', false);
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
