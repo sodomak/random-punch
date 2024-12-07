@@ -331,6 +331,11 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
     final locale = Localizations.localeOf(context);
     debugPrint('Using locale: ${locale.languageCode}');
     
+    // Ensure sound service is initialized with current language
+    if (_soundService.needsReinitialization(locale.languageCode)) {
+      await _soundService.initialize(languageCode: locale.languageCode);
+    }
+    
     for (final number in numbers) {
       if (!mounted) break;
       debugPrint('Attempting to play number: $number');
@@ -338,6 +343,16 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
       debugPrint('Finished playing number: $number');
     }
     debugPrint('Finished playing sequence: $numbers');
+  }
+
+  void _updateSettings() {
+    setState(() {
+      _countdown = widget.settings.countdownLength.inSeconds;
+      _remainingTime = Duration(seconds: widget.settings.roundLength.inSeconds);
+      _isBreak = false;
+      _isCountingDown = true;
+    });
+    widget.soundService.onSettingsChanged();
   }
 
   @override

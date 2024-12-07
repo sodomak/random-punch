@@ -5,10 +5,14 @@ import 'package:flutter/foundation.dart';
 import 'dart:io';
 
 class SoundService {
+  static const String defaultLanguage = 'en';
+  
+  AudioPlayer? _player;
   bool _isMuted = false;
   bool _isInitialized = false;
-  String? _currentLanguage;
+  String _currentLanguage = defaultLanguage;
   static const String _muteKey = 'isMuted';
+  bool _isSettingsChanged = false;
 
   SoundService() {
     _loadMuteState();
@@ -24,50 +28,47 @@ class SoundService {
     await prefs.setBool(_muteKey, _isMuted);
   }
 
-  Future<void> initialize([String? languageCode]) async {
-    if (_isInitialized && languageCode == _currentLanguage) return;
+  bool needsReinitialization(String? languageCode) {
+    if (!_isInitialized) return true;
+    if (languageCode != null && languageCode != _currentLanguage) return true;
+    return false;
+  }
+
+  Future<void> initialize({required String languageCode}) async {
+    _currentLanguage = languageCode;
+    _isInitialized = true;
+    _isSettingsChanged = false;
+  }
+
+  Future<void> dispose() async {
+    if (_player != null) {
+      try {
+        await _player?.dispose();
+      } catch (e) {
+        debugPrint('[SoundService] Error disposing player: $e');
+      }
+      _player = null;
+    }
+    _isInitialized = false;
+  }
+
+  Future<void> _playSound(String assetPath, {bool testMode = false}) async {
+    if (_isMuted || !_isInitialized) return;
     
     try {
-      debugPrint('[SoundService] Starting initialization');
+      final player = await _createPlayer(assetPath);
+      await player.seek(Duration.zero);
+      await player.play();
       
-      // Create cache directory if it doesn't exist
-      final cacheDir = Directory('/data/user/0/com.sodomak.randompunch/cache/just_audio_cache/');
-      if (!await cacheDir.exists()) {
-        await cacheDir.create(recursive: true);
-      }
+      // Wait for completion
+      await player.playerStateStream.firstWhere(
+        (state) => state.processingState == ProcessingState.completed
+      );
+      await player.dispose();
       
-      await AudioPlayer.clearAssetCache();
-      final testPlayer = AudioPlayer();
-      final testPath = languageCode != null ? 
-        'assets/sounds/$languageCode/1.mp3' : 
-        'assets/sounds/countdown.mp3';
-        
-      debugPrint('[SoundService] Testing with path: $testPath');
-      await testPlayer.setAsset(testPath);
-      debugPrint('[SoundService] Asset set successfully');
-      
-      await testPlayer.seek(Duration.zero);
-      await testPlayer.setVolume(0);
-      
-      if (kIsWeb) {
-        _isInitialized = true;
-        debugPrint('[SoundService] Web audio context initialized');
-      } else {
-        debugPrint('[SoundService] Starting mobile playback test');
-        await testPlayer.play();
-        await Future.delayed(const Duration(milliseconds: 100));
-        await testPlayer.stop();
-        _isInitialized = true;
-        debugPrint('[SoundService] Mobile audio initialized successfully');
-      }
-      
-      await testPlayer.dispose();
-      _currentLanguage = languageCode;
-      
-    } catch (e, stackTrace) {
-      debugPrint('[SoundService] Initialization error: $e');
-      debugPrint('[SoundService] Stack trace: $stackTrace');
-      _isInitialized = false;
+    } catch (e) {
+      debugPrint('[SoundService] Playback error: $e');
+      rethrow;
     }
   }
 
@@ -123,23 +124,28 @@ class SoundService {
   }
 
   Future<void> playStart() async {
-    if (_isMuted || !_isInitialized) return;
+    if (_isMuted) return;
+    
     try {
-      final player = await _createPlayer('assets/sounds/start.mp3');
-      await player.seek(Duration.zero);
-      await player.play();
-      await player.dispose();
+      // Force initialization check for start sound
+      if (!_isInitialized) {
+        await initialize(languageCode: _currentLanguage);
+      }
+      await _playSound('assets/sounds/start.mp3');
     } catch (e) {
-      developer.log('Error playing start sound: $e', error: e);
+      debugPrint('[SoundService] Error playing start sound: $e');
     }
   }
 
   Future<void> playEnd() async {
-    if (_isMuted || !_isInitialized) return;
+    if (_isMuted || !_isInitialized || _isSettingsChanged) return;
     try {
       final player = await _createPlayer('assets/sounds/end.mp3');
       await player.seek(Duration.zero);
       await player.play();
+      await player.playerStateStream.firstWhere(
+        (state) => state.processingState == ProcessingState.completed
+      );
       await player.dispose();
     } catch (e) {
       developer.log('Error playing end sound: $e', error: e);
@@ -152,6 +158,9 @@ class SoundService {
       final player = await _createPlayer('assets/sounds/finish.mp3');
       await player.seek(Duration.zero);
       await player.play();
+      await player.playerStateStream.firstWhere(
+        (state) => state.processingState == ProcessingState.completed
+      );
       await player.dispose();
     } catch (e) {
       developer.log('Error playing finish sound: $e', error: e);
@@ -212,8 +221,19 @@ class SoundService {
     }
   }
 
-  void dispose() {
+  Future<void> _disposePlayer() async {
+    if (_player != null) {
+      try {
+        await _player?.dispose();
+      } catch (e) {
+        debugPrint('[SoundService] Error disposing player: $e');
+      }
+      _player = null;
+    }
+  }
+
+  void onSettingsChanged() {
     _isInitialized = false;
-    developer.log('Disposing SoundService');
+    _isSettingsChanged = true;
   }
 } 

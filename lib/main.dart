@@ -68,7 +68,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _initServices() async {
-    await _soundService.initialize();
+    await _soundService.initialize(languageCode: 'en');
     await _loadThemeSettings();
     await _loadLanguageSettings();
   }
@@ -89,7 +89,7 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _locale = Locale(savedLanguage, '');
     });
-    await _soundService.initialize(savedLanguage);
+    await _soundService.initialize(languageCode: savedLanguage);
   }
 
   void _setLocale(Locale locale) async {
@@ -99,7 +99,7 @@ class _MyAppState extends State<MyApp> {
     try {
       final settingsService = SettingsService();
       await settingsService.setLanguage(locale.languageCode);
-      await _soundService.initialize(locale.languageCode);
+      await _soundService.initialize(languageCode: locale.languageCode);
       debugPrint('Set locale to: ${locale.languageCode}');
     } catch (e) {
       debugPrint('Error saving language setting: $e');
