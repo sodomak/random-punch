@@ -10,6 +10,13 @@
 /build/
 *.iml
 
+# Keystore files
+*.jks
+*.keystore
+*.p12
+key.properties
+upload-keystore.jks
+
 # Android specific
 **/android/**/gradle-wrapper.jar
 **/android/.gradle
