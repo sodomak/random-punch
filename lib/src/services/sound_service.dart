@@ -27,11 +27,10 @@ class SoundService {
     if (_isInitialized && languageCode == _currentLanguage) return;
     
     try {
-      // Clear any existing resources
+      _isInitialized = false;  // Reset initialization state
       await AudioPlayer.clearAssetCache();
       
       if (kIsWeb) {
-        // Pre-initialize audio context and test with the current language
         final testPlayer = AudioPlayer();
         final testPath = languageCode != null ? 
           'assets/sounds/$languageCode/1.mp3' : 
@@ -169,6 +168,8 @@ class SoundService {
   }
 
   void dispose() {
+    _isInitialized = false;
+    _currentLanguage = null;
     developer.log('Disposing SoundService');
   }
 } 

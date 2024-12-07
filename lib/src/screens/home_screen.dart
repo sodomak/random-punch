@@ -91,6 +91,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: ElevatedButton(
                 onPressed: () async {
                   final settings = await SettingsService().loadSettings('Default');
+                  final locale = Localizations.localeOf(context);
+                  await widget.soundService.initialize(locale.languageCode);
                   Navigator.push(
                     context,
                     MaterialPageRoute(

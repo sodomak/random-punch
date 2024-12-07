@@ -55,6 +55,7 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
     WidgetsBinding.instance.addObserver(this);
     _remainingTime = Duration.zero;
     _keepScreenOn();
+    _initializeSound();
     _startCountdown();
   }
 
@@ -70,6 +71,11 @@ class _TrainingScreenState extends State<TrainingScreen> with WidgetsBindingObse
     } catch (e) {
       debugPrint('Error setting screen orientation: $e');
     }
+  }
+
+  Future<void> _initializeSound() async {
+    final locale = Localizations.localeOf(context);
+    await _soundService.initialize(locale.languageCode);
   }
 
   @override
