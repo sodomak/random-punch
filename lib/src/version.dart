@@ -1,2 +1,2 @@
 // This file is generated automatically
-const String appVersion = '1.1.6';
+const String appVersion = '1.1.7';
