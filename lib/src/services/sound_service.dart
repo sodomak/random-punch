@@ -8,6 +8,7 @@ class SoundService {
   bool _isInitialized = false;
   String? _currentLanguage;
   static const String _muteKey = 'isMuted';
+  final Map<String, AudioPlayer> _players = {};
 
   SoundService() {
     _loadMuteState();
@@ -27,24 +28,21 @@ class SoundService {
     if (_isInitialized && languageCode == _currentLanguage) return;
     
     try {
-      _isInitialized = false;  // Reset initialization state
+      // Dispose of any existing players
+      for (var player in _players.values) {
+        await player.dispose();
+      }
+      _players.clear();
+      
+      _isInitialized = false;
       await AudioPlayer.clearAssetCache();
       
-      if (kIsWeb) {
-        final testPlayer = AudioPlayer();
-        final testPath = languageCode != null ? 
-          'assets/sounds/$languageCode/1.mp3' : 
-          'assets/sounds/countdown.mp3';
-          
-        await testPlayer.setAsset(testPath);
-        await testPlayer.seek(Duration.zero);
-        await testPlayer.setVolume(0);
-        await testPlayer.play();
-        await testPlayer.stop();
-        await testPlayer.dispose();
-        
-        debugPrint('Web audio context initialized successfully for language: $languageCode');
-      }
+      // Initialize all required audio players
+      await _initializePlayer('countdown', 'assets/sounds/countdown.mp3');
+      await _initializePlayer('start', 'assets/sounds/start.mp3');
+      await _initializePlayer('end', 'assets/sounds/end.mp3');
+      await _initializePlayer('finish', 'assets/sounds/finish.mp3');
+      
       _currentLanguage = languageCode;
       _isInitialized = true;
       debugPrint('SoundService initialized successfully');
@@ -54,122 +52,79 @@ class SoundService {
     }
   }
 
+  Future<void> _initializePlayer(String key, String assetPath) async {
+    final player = AudioPlayer();
+    await player.setAsset(assetPath);
+    _players[key] = player;
+  }
+
+  Future<void> _playSound(String key) async {
+    if (_isMuted || !_isInitialized) return;
+    try {
+      final player = _players[key];
+      if (player != null) {
+        await player.seek(Duration.zero);
+        await player.play();
+      }
+    } catch (e) {
+      debugPrint('Error playing sound $key: $e');
+    }
+  }
+
+  Future<void> playNumber(int number, String languageCode) async {
+    if (_isMuted || !_isInitialized) return;
+    
+    try {
+      final player = AudioPlayer();
+      String assetPath = 'assets/sounds/$languageCode/$number.mp3';
+      
+      await player.setAsset(assetPath);
+      await player.seek(Duration.zero);
+      await player.play();
+      
+      await player.playerStateStream.firstWhere(
+        (state) => state.processingState == ProcessingState.completed
+      );
+      
+      await player.dispose();
+    } catch (e) {
+      debugPrint('Error playing number sound: $e');
+      if (languageCode != 'en') {
+        // Try fallback to English
+        try {
+          final player = AudioPlayer();
+          await player.setAsset('assets/sounds/en/$number.mp3');
+          await player.seek(Duration.zero);
+          await player.play();
+          await player.playerStateStream.firstWhere(
+            (state) => state.processingState == ProcessingState.completed
+          );
+          await player.dispose();
+        } catch (e) {
+          debugPrint('Fallback sound failed: $e');
+        }
+      }
+    }
+  }
+
+  Future<void> playCountdown() async => _playSound('countdown');
+  Future<void> playStart() async => _playSound('start');
+  Future<void> playEnd() async => _playSound('end');
+  Future<void> playFinish() async => _playSound('finish');
+
   bool get isMuted => _isMuted;
 
   void toggleMute() {
     _isMuted = !_isMuted;
     _saveMuteState();
-    developer.log('SoundService mute toggled: $_isMuted');
-  }
-
-  Future<AudioPlayer> _createPlayer(String assetPath) async {
-    final player = AudioPlayer();
-    await player.setLoopMode(LoopMode.off);
-    await player.setAsset(assetPath);
-    return player;
-  }
-
-  Future<void> playCountdown() async {
-    if (_isMuted || !_isInitialized) return;
-    try {
-      final player = await _createPlayer('assets/sounds/countdown.mp3');
-      await player.seek(Duration.zero);
-      await player.play();
-      await player.dispose();
-    } catch (e) {
-      developer.log('Error playing countdown sound: $e', error: e);
-    }
-  }
-
-  Future<void> playStart() async {
-    if (_isMuted || !_isInitialized) return;
-    try {
-      final player = await _createPlayer('assets/sounds/start.mp3');
-      await player.seek(Duration.zero);
-      await player.play();
-      await player.dispose();
-    } catch (e) {
-      developer.log('Error playing start sound: $e', error: e);
-    }
-  }
-
-  Future<void> playEnd() async {
-    if (_isMuted || !_isInitialized) return;
-    try {
-      final player = await _createPlayer('assets/sounds/end.mp3');
-      await player.seek(Duration.zero);
-      await player.play();
-      await player.dispose();
-    } catch (e) {
-      developer.log('Error playing end sound: $e', error: e);
-    }
-  }
-
-  Future<void> playFinish() async {
-    if (_isMuted || !_isInitialized) return;
-    try {
-      final player = await _createPlayer('assets/sounds/finish.mp3');
-      await player.seek(Duration.zero);
-      await player.play();
-      await player.dispose();
-    } catch (e) {
-      developer.log('Error playing finish sound: $e', error: e);
-    }
-  }
-
-  Future<AudioPlayer?> playNumber(int number, String languageCode) async {
-    if (_isMuted || !_isInitialized) {
-      debugPrint('Sound skipped: muted=$_isMuted, initialized=$_isInitialized');
-      return null;
-    }
-    
-    try {
-      String assetPath = 'assets/sounds/$languageCode/$number.mp3';
-      debugPrint('Attempting to play sound: $assetPath');
-      
-      final player = await _createPlayer(assetPath);
-      await player.seek(Duration.zero);
-      await player.play();
-      
-      // Wait for completion
-      await player.playerStateStream.firstWhere(
-        (state) => state.processingState == ProcessingState.completed
-      );
-      await player.dispose();
-      debugPrint('Successfully played and disposed: $assetPath');
-      return null;
-      
-    } catch (e) {
-      debugPrint('Primary language sound failed ($languageCode): $e');
-      if (languageCode != 'en') {
-        try {
-          String fallbackPath = 'assets/sounds/en/$number.mp3';
-          debugPrint('Attempting fallback sound: $fallbackPath');
-          
-          final player = await _createPlayer(fallbackPath);
-          await player.seek(Duration.zero);
-          await player.play();
-          
-          // Wait for completion
-          await player.playerStateStream.firstWhere(
-            (state) => state.processingState == ProcessingState.completed
-          );
-          await player.dispose();
-          debugPrint('Successfully played and disposed fallback: $fallbackPath');
-          return null;
-        } catch (e) {
-          debugPrint('Fallback sound failed: $e');
-          return null;
-        }
-      }
-      debugPrint('Error playing any sound: $e');
-      return null;
-    }
   }
 
   void dispose() {
+    for (var player in _players.values) {
+      player.dispose();
+    }
+    _players.clear();
     _isInitialized = false;
     _currentLanguage = null;
-    developer.log('Disposing SoundService');
   }
 } 
