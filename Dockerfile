@@ -40,10 +40,17 @@ FROM nginx:alpine
 # Copy the built web app to nginx
 COPY --from=builder /app/build/web /usr/share/nginx/html
 
+# Set proper permissions for nginx user
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html
+
 # Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 80
 EXPOSE 80
+
+# Switch to non-root user
+USER nginx
 
 CMD ["nginx", "-g", "daemon off;"]
