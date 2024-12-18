@@ -50,7 +50,10 @@ RUN chown -R nginx:nginx /usr/share/nginx/html && \
     chmod -R 755 /etc/nginx/conf.d && \
     mkdir -p /var/cache/nginx /var/run && \
     chown -R nginx:nginx /var/cache/nginx /var/run && \
-    chmod -R 755 /var/cache/nginx /var/run
+    chmod -R 755 /var/cache/nginx /var/run && \
+    touch /var/run/nginx.pid && \
+    chown nginx:nginx /var/run/nginx.pid && \
+    chmod 755 /var/run/nginx.pid
 
 # Expose port 80
 EXPOSE 80
