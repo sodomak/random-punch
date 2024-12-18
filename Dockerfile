@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Flutter
-ENV FLUTTER_VERSION="3.24.5"
+ENV FLUTTER_VERSION="3.16.9"
 RUN git clone https://github.com/flutter/flutter.git -b stable /flutter
 ENV PATH="/flutter/bin:$PATH"
 
@@ -21,6 +21,13 @@ RUN flutter config --enable-web
 # Copy the app source code
 WORKDIR /app
 COPY . .
+
+# Override just_audio_web version to a compatible one
+RUN sed -i 's/just_audio_web: .*/just_audio_web: 0.4.9/' pubspec.yaml && \
+    sed -i 's/just_audio: .*/just_audio: 0.9.34/' pubspec.yaml
+
+# Force dependency resolution
+RUN rm -f pubspec.lock
 
 # Build the web app
 RUN flutter clean
@@ -33,7 +40,7 @@ FROM nginx:alpine
 # Copy the built web app to nginx
 COPY --from=builder /app/build/web /usr/share/nginx/html
 
-# Copy custom nginx configuration if needed
+# Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 80
