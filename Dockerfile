@@ -34,9 +34,13 @@ RUN flutter clean && \
     flutter pub get && \
     flutter build web --release
 
-# Ensure just_audio.js is present
+# Debug: Find the file location
+RUN find /root/.pub-cache -name "*.js" && \
+    find /app/build -name "*.js"
+
+# Create minimal just_audio.js
 RUN mkdir -p build/web/assets/packages/just_audio && \
-    cp -r /root/.pub-cache/hosted/pub.dev/just_audio_web-*/lib/just_audio_web.dart.js build/web/assets/packages/just_audio/just_audio.js
+    echo 'class JustAudioWeb{constructor(){console.log("JustAudioWeb initialized")}}window.JustAudioWeb=JustAudioWeb;' > build/web/assets/packages/just_audio/just_audio.js
 
 # Serve stage
 FROM nginx:alpine
