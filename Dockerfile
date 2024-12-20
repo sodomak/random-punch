@@ -30,9 +30,13 @@ RUN sed -i 's/just_audio_web: .*/just_audio_web: 0.4.9/' pubspec.yaml && \
 RUN rm -f pubspec.lock
 
 # Build the web app
-RUN flutter clean
-RUN flutter pub get
-RUN flutter build web --release
+RUN flutter clean && \
+    flutter pub get && \
+    flutter build web --release
+
+# Ensure just_audio.js is present
+RUN mkdir -p build/web/assets/packages/just_audio && \
+    cp -r build/web/packages/just_audio/just_audio.js build/web/assets/packages/just_audio/
 
 # Serve stage
 FROM nginx:alpine
