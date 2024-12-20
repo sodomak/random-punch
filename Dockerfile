@@ -36,7 +36,7 @@ RUN flutter clean && \
 
 # Ensure just_audio.js is present
 RUN mkdir -p build/web/assets/packages/just_audio && \
-    find build/web -name "just_audio.js" -exec cp {} build/web/assets/packages/just_audio/ \;
+    cp -r /root/.pub-cache/hosted/pub.dev/just_audio_web-*/lib/just_audio_web.dart.js build/web/assets/packages/just_audio/just_audio.js
 
 # Serve stage
 FROM nginx:alpine
